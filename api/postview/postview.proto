@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+// protoc -I. --go_out=plugins=grpc:$GOPATH/src ./api/postview/postview.proto
+
+package postview;
+option go_package = "git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message GetPostRequest {
+    string token = 1;
+}
+
+message GetPostResponse {
+    Post post = 1;
+    int32 error = 2;
+}
+
+message Post {
+    PostData data = 1;
+    Widgets widgets = 2;
+    string token = 3;
+}
+
+service PostView {
+    rpc GetPost(GetPostRequest) returns (GetPostResponse);
+}
+
+message PostData {
+    google.protobuf.Value nabz_product_id = 1;
+    google.protobuf.Value business_card_slug = 2;
+    SEOData seo = 3;
+    ShareData share = 4;
+    string url = 5;
+}
+
+message SEOData {
+    string title = 1;
+    string description = 2;
+    string url = 3;
+    string home_url = 4;
+    string android_package_name = 5;
+    string ios_app_id = 6;
+    string android_app_url = 7;
+    string ios_app_url = 8;
+    google.protobuf.Timestamp google_expire_time = 9;
+    string thumbnail = 10;
+}
+
+message ShareData {
+    string title = 1;
+    string description = 2;
+    string android_url = 3;
+    string ios_url = 4;
+    string web_url = 5;
+}
+
+message HeaderWidget {
+    string date = 1;
+    string title = 2;
+    string thumbnail = 3;
+    string place = 4;
+}
+
+message ListWidgetItem {
+    string title = 1;
+    string format = 2;
+    string value = 3;
+}
+
+message BreadCrumbCategory {
+    string parent_slug = 1;
+    string slug = 2;
+    google.protobuf.Value icon_url = 3;
+    string title = 4;
+    string second_slug = 5;
+}
+
+message BreadCrumb {
+    repeated BreadCrumbCategory categories = 1;
+    string mail_url = 2;
+    string base_url = 3;
+}
+
+message Contact {
+    string phone = 1;
+    string email = 2;
+    int32 ab_mode = 3;
+    bool chat = 4;
+}
+
+message LinkItem {
+    string title = 1;
+    string url = 2;
+}
+
+message Suggestions {
+    bool suggestions_available = 1;
+}
+
+message Note {
+    bool enable = 1;
+}
+
+message Location {
+
+}
+
+message Widgets {
+    HeaderWidget header = 1;
+    string description = 2;
+    repeated ListWidgetItem list_data = 3;
+    Location location = 4;
+    repeated string images = 5;
+    BreadCrumb breadcrumb = 6;
+    Contact contact = 7;
+    repeated LinkItem links = 8;
+    Suggestions suggestions = 9;
+    Note note = 10;
+}
+
