@@ -7,11 +7,8 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -67,7 +64,6 @@ func (m *GetPostRequest) GetToken() string {
 
 type GetPostResponse struct {
 	Post                 *Post    `protobuf:"bytes,1,opt,name=post,proto3" json:"post,omitempty"`
-	Error                int32    `protobuf:"varint,2,opt,name=error,proto3" json:"error,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -105,20 +101,17 @@ func (m *GetPostResponse) GetPost() *Post {
 	return nil
 }
 
-func (m *GetPostResponse) GetError() int32 {
-	if m != nil {
-		return m.Error
-	}
-	return 0
-}
-
 type Post struct {
-	Data                 *PostData `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	Widgets              *Widgets  `protobuf:"bytes,2,opt,name=widgets,proto3" json:"widgets,omitempty"`
-	Token                string    `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	Title                string               `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description          string               `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Token                string               `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	Thumbnail            string               `protobuf:"bytes,4,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
+	Contact              *Contact             `protobuf:"bytes,5,opt,name=contact,proto3" json:"contact,omitempty"`
+	PublishedAt          *timestamp.Timestamp `protobuf:"bytes,6,opt,name=published_at,json=publishedAt,proto3" json:"published_at,omitempty"`
+	CategorySlugs        []string             `protobuf:"bytes,7,rep,name=category_slugs,json=categorySlugs,proto3" json:"category_slugs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
 func (m *Post) Reset()         { *m = Post{} }
@@ -146,18 +139,18 @@ func (m *Post) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Post proto.InternalMessageInfo
 
-func (m *Post) GetData() *PostData {
+func (m *Post) GetTitle() string {
 	if m != nil {
-		return m.Data
+		return m.Title
 	}
-	return nil
+	return ""
 }
 
-func (m *Post) GetWidgets() *Widgets {
+func (m *Post) GetDescription() string {
 	if m != nil {
-		return m.Widgets
+		return m.Description
 	}
-	return nil
+	return ""
 }
 
 func (m *Post) GetToken() string {
@@ -167,507 +160,37 @@ func (m *Post) GetToken() string {
 	return ""
 }
 
-type PostData struct {
-	NabzProductId        *_struct.Value `protobuf:"bytes,1,opt,name=nabz_product_id,json=nabzProductId,proto3" json:"nabz_product_id,omitempty"`
-	BusinessCardSlug     *_struct.Value `protobuf:"bytes,2,opt,name=business_card_slug,json=businessCardSlug,proto3" json:"business_card_slug,omitempty"`
-	Seo                  *SEOData       `protobuf:"bytes,3,opt,name=seo,proto3" json:"seo,omitempty"`
-	Share                *ShareData     `protobuf:"bytes,4,opt,name=share,proto3" json:"share,omitempty"`
-	Url                  string         `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *PostData) Reset()         { *m = PostData{} }
-func (m *PostData) String() string { return proto.CompactTextString(m) }
-func (*PostData) ProtoMessage()    {}
-func (*PostData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{3}
-}
-
-func (m *PostData) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PostData.Unmarshal(m, b)
-}
-func (m *PostData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PostData.Marshal(b, m, deterministic)
-}
-func (m *PostData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PostData.Merge(m, src)
-}
-func (m *PostData) XXX_Size() int {
-	return xxx_messageInfo_PostData.Size(m)
-}
-func (m *PostData) XXX_DiscardUnknown() {
-	xxx_messageInfo_PostData.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_PostData proto.InternalMessageInfo
-
-func (m *PostData) GetNabzProductId() *_struct.Value {
-	if m != nil {
-		return m.NabzProductId
-	}
-	return nil
-}
-
-func (m *PostData) GetBusinessCardSlug() *_struct.Value {
-	if m != nil {
-		return m.BusinessCardSlug
-	}
-	return nil
-}
-
-func (m *PostData) GetSeo() *SEOData {
-	if m != nil {
-		return m.Seo
-	}
-	return nil
-}
-
-func (m *PostData) GetShare() *ShareData {
-	if m != nil {
-		return m.Share
-	}
-	return nil
-}
-
-func (m *PostData) GetUrl() string {
-	if m != nil {
-		return m.Url
-	}
-	return ""
-}
-
-type SEOData struct {
-	Title                string               `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description          string               `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Url                  string               `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
-	HomeUrl              string               `protobuf:"bytes,4,opt,name=home_url,json=homeUrl,proto3" json:"home_url,omitempty"`
-	AndroidPackageName   string               `protobuf:"bytes,5,opt,name=android_package_name,json=androidPackageName,proto3" json:"android_package_name,omitempty"`
-	IosAppId             string               `protobuf:"bytes,6,opt,name=ios_app_id,json=iosAppId,proto3" json:"ios_app_id,omitempty"`
-	AndroidAppUrl        string               `protobuf:"bytes,7,opt,name=android_app_url,json=androidAppUrl,proto3" json:"android_app_url,omitempty"`
-	IosAppUrl            string               `protobuf:"bytes,8,opt,name=ios_app_url,json=iosAppUrl,proto3" json:"ios_app_url,omitempty"`
-	GoogleExpireTime     *timestamp.Timestamp `protobuf:"bytes,9,opt,name=google_expire_time,json=googleExpireTime,proto3" json:"google_expire_time,omitempty"`
-	Thumbnail            string               `protobuf:"bytes,10,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
-	XXX_unrecognized     []byte               `json:"-"`
-	XXX_sizecache        int32                `json:"-"`
-}
-
-func (m *SEOData) Reset()         { *m = SEOData{} }
-func (m *SEOData) String() string { return proto.CompactTextString(m) }
-func (*SEOData) ProtoMessage()    {}
-func (*SEOData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{4}
-}
-
-func (m *SEOData) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SEOData.Unmarshal(m, b)
-}
-func (m *SEOData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SEOData.Marshal(b, m, deterministic)
-}
-func (m *SEOData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SEOData.Merge(m, src)
-}
-func (m *SEOData) XXX_Size() int {
-	return xxx_messageInfo_SEOData.Size(m)
-}
-func (m *SEOData) XXX_DiscardUnknown() {
-	xxx_messageInfo_SEOData.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SEOData proto.InternalMessageInfo
-
-func (m *SEOData) GetTitle() string {
-	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *SEOData) GetDescription() string {
-	if m != nil {
-		return m.Description
-	}
-	return ""
-}
-
-func (m *SEOData) GetUrl() string {
-	if m != nil {
-		return m.Url
-	}
-	return ""
-}
-
-func (m *SEOData) GetHomeUrl() string {
-	if m != nil {
-		return m.HomeUrl
-	}
-	return ""
-}
-
-func (m *SEOData) GetAndroidPackageName() string {
-	if m != nil {
-		return m.AndroidPackageName
-	}
-	return ""
-}
-
-func (m *SEOData) GetIosAppId() string {
-	if m != nil {
-		return m.IosAppId
-	}
-	return ""
-}
-
-func (m *SEOData) GetAndroidAppUrl() string {
-	if m != nil {
-		return m.AndroidAppUrl
-	}
-	return ""
-}
-
-func (m *SEOData) GetIosAppUrl() string {
-	if m != nil {
-		return m.IosAppUrl
-	}
-	return ""
-}
-
-func (m *SEOData) GetGoogleExpireTime() *timestamp.Timestamp {
-	if m != nil {
-		return m.GoogleExpireTime
-	}
-	return nil
-}
-
-func (m *SEOData) GetThumbnail() string {
+func (m *Post) GetThumbnail() string {
 	if m != nil {
 		return m.Thumbnail
 	}
 	return ""
 }
 
-type ShareData struct {
-	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description          string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	AndroidUrl           string   `protobuf:"bytes,3,opt,name=android_url,json=androidUrl,proto3" json:"android_url,omitempty"`
-	IosUrl               string   `protobuf:"bytes,4,opt,name=ios_url,json=iosUrl,proto3" json:"ios_url,omitempty"`
-	WebUrl               string   `protobuf:"bytes,5,opt,name=web_url,json=webUrl,proto3" json:"web_url,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ShareData) Reset()         { *m = ShareData{} }
-func (m *ShareData) String() string { return proto.CompactTextString(m) }
-func (*ShareData) ProtoMessage()    {}
-func (*ShareData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{5}
-}
-
-func (m *ShareData) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ShareData.Unmarshal(m, b)
-}
-func (m *ShareData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ShareData.Marshal(b, m, deterministic)
-}
-func (m *ShareData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ShareData.Merge(m, src)
-}
-func (m *ShareData) XXX_Size() int {
-	return xxx_messageInfo_ShareData.Size(m)
-}
-func (m *ShareData) XXX_DiscardUnknown() {
-	xxx_messageInfo_ShareData.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ShareData proto.InternalMessageInfo
-
-func (m *ShareData) GetTitle() string {
+func (m *Post) GetContact() *Contact {
 	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *ShareData) GetDescription() string {
-	if m != nil {
-		return m.Description
-	}
-	return ""
-}
-
-func (m *ShareData) GetAndroidUrl() string {
-	if m != nil {
-		return m.AndroidUrl
-	}
-	return ""
-}
-
-func (m *ShareData) GetIosUrl() string {
-	if m != nil {
-		return m.IosUrl
-	}
-	return ""
-}
-
-func (m *ShareData) GetWebUrl() string {
-	if m != nil {
-		return m.WebUrl
-	}
-	return ""
-}
-
-type HeaderWidget struct {
-	Date                 string   `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	Title                string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Thumbnail            string   `protobuf:"bytes,3,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
-	Place                string   `protobuf:"bytes,4,opt,name=place,proto3" json:"place,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *HeaderWidget) Reset()         { *m = HeaderWidget{} }
-func (m *HeaderWidget) String() string { return proto.CompactTextString(m) }
-func (*HeaderWidget) ProtoMessage()    {}
-func (*HeaderWidget) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{6}
-}
-
-func (m *HeaderWidget) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_HeaderWidget.Unmarshal(m, b)
-}
-func (m *HeaderWidget) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_HeaderWidget.Marshal(b, m, deterministic)
-}
-func (m *HeaderWidget) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HeaderWidget.Merge(m, src)
-}
-func (m *HeaderWidget) XXX_Size() int {
-	return xxx_messageInfo_HeaderWidget.Size(m)
-}
-func (m *HeaderWidget) XXX_DiscardUnknown() {
-	xxx_messageInfo_HeaderWidget.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_HeaderWidget proto.InternalMessageInfo
-
-func (m *HeaderWidget) GetDate() string {
-	if m != nil {
-		return m.Date
-	}
-	return ""
-}
-
-func (m *HeaderWidget) GetTitle() string {
-	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *HeaderWidget) GetThumbnail() string {
-	if m != nil {
-		return m.Thumbnail
-	}
-	return ""
-}
-
-func (m *HeaderWidget) GetPlace() string {
-	if m != nil {
-		return m.Place
-	}
-	return ""
-}
-
-type ListWidgetItem struct {
-	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Format               string   `protobuf:"bytes,2,opt,name=format,proto3" json:"format,omitempty"`
-	Value                string   `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ListWidgetItem) Reset()         { *m = ListWidgetItem{} }
-func (m *ListWidgetItem) String() string { return proto.CompactTextString(m) }
-func (*ListWidgetItem) ProtoMessage()    {}
-func (*ListWidgetItem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{7}
-}
-
-func (m *ListWidgetItem) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ListWidgetItem.Unmarshal(m, b)
-}
-func (m *ListWidgetItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ListWidgetItem.Marshal(b, m, deterministic)
-}
-func (m *ListWidgetItem) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListWidgetItem.Merge(m, src)
-}
-func (m *ListWidgetItem) XXX_Size() int {
-	return xxx_messageInfo_ListWidgetItem.Size(m)
-}
-func (m *ListWidgetItem) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListWidgetItem.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ListWidgetItem proto.InternalMessageInfo
-
-func (m *ListWidgetItem) GetTitle() string {
-	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *ListWidgetItem) GetFormat() string {
-	if m != nil {
-		return m.Format
-	}
-	return ""
-}
-
-func (m *ListWidgetItem) GetValue() string {
-	if m != nil {
-		return m.Value
-	}
-	return ""
-}
-
-type BreadCrumbCategory struct {
-	ParentSlug           string         `protobuf:"bytes,1,opt,name=parent_slug,json=parentSlug,proto3" json:"parent_slug,omitempty"`
-	Slug                 string         `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
-	IconUrl              *_struct.Value `protobuf:"bytes,3,opt,name=icon_url,json=iconUrl,proto3" json:"icon_url,omitempty"`
-	Title                string         `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	SecondSlug           string         `protobuf:"bytes,5,opt,name=second_slug,json=secondSlug,proto3" json:"second_slug,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
-}
-
-func (m *BreadCrumbCategory) Reset()         { *m = BreadCrumbCategory{} }
-func (m *BreadCrumbCategory) String() string { return proto.CompactTextString(m) }
-func (*BreadCrumbCategory) ProtoMessage()    {}
-func (*BreadCrumbCategory) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{8}
-}
-
-func (m *BreadCrumbCategory) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_BreadCrumbCategory.Unmarshal(m, b)
-}
-func (m *BreadCrumbCategory) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_BreadCrumbCategory.Marshal(b, m, deterministic)
-}
-func (m *BreadCrumbCategory) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BreadCrumbCategory.Merge(m, src)
-}
-func (m *BreadCrumbCategory) XXX_Size() int {
-	return xxx_messageInfo_BreadCrumbCategory.Size(m)
-}
-func (m *BreadCrumbCategory) XXX_DiscardUnknown() {
-	xxx_messageInfo_BreadCrumbCategory.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_BreadCrumbCategory proto.InternalMessageInfo
-
-func (m *BreadCrumbCategory) GetParentSlug() string {
-	if m != nil {
-		return m.ParentSlug
-	}
-	return ""
-}
-
-func (m *BreadCrumbCategory) GetSlug() string {
-	if m != nil {
-		return m.Slug
-	}
-	return ""
-}
-
-func (m *BreadCrumbCategory) GetIconUrl() *_struct.Value {
-	if m != nil {
-		return m.IconUrl
+		return m.Contact
 	}
 	return nil
 }
 
-func (m *BreadCrumbCategory) GetTitle() string {
+func (m *Post) GetPublishedAt() *timestamp.Timestamp {
 	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *BreadCrumbCategory) GetSecondSlug() string {
-	if m != nil {
-		return m.SecondSlug
-	}
-	return ""
-}
-
-type BreadCrumb struct {
-	Categories           []*BreadCrumbCategory `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
-	MailUrl              string                `protobuf:"bytes,2,opt,name=mail_url,json=mailUrl,proto3" json:"mail_url,omitempty"`
-	BaseUrl              string                `protobuf:"bytes,3,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
-	XXX_unrecognized     []byte                `json:"-"`
-	XXX_sizecache        int32                 `json:"-"`
-}
-
-func (m *BreadCrumb) Reset()         { *m = BreadCrumb{} }
-func (m *BreadCrumb) String() string { return proto.CompactTextString(m) }
-func (*BreadCrumb) ProtoMessage()    {}
-func (*BreadCrumb) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{9}
-}
-
-func (m *BreadCrumb) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_BreadCrumb.Unmarshal(m, b)
-}
-func (m *BreadCrumb) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_BreadCrumb.Marshal(b, m, deterministic)
-}
-func (m *BreadCrumb) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BreadCrumb.Merge(m, src)
-}
-func (m *BreadCrumb) XXX_Size() int {
-	return xxx_messageInfo_BreadCrumb.Size(m)
-}
-func (m *BreadCrumb) XXX_DiscardUnknown() {
-	xxx_messageInfo_BreadCrumb.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_BreadCrumb proto.InternalMessageInfo
-
-func (m *BreadCrumb) GetCategories() []*BreadCrumbCategory {
-	if m != nil {
-		return m.Categories
+		return m.PublishedAt
 	}
 	return nil
 }
 
-func (m *BreadCrumb) GetMailUrl() string {
+func (m *Post) GetCategorySlugs() []string {
 	if m != nil {
-		return m.MailUrl
+		return m.CategorySlugs
 	}
-	return ""
-}
-
-func (m *BreadCrumb) GetBaseUrl() string {
-	if m != nil {
-		return m.BaseUrl
-	}
-	return ""
+	return nil
 }
 
 type Contact struct {
 	Phone                string   `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
 	Email                string   `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	AbMode               int32    `protobuf:"varint,3,opt,name=ab_mode,json=abMode,proto3" json:"ab_mode,omitempty"`
 	Chat                 bool     `protobuf:"varint,4,opt,name=chat,proto3" json:"chat,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -678,7 +201,7 @@ func (m *Contact) Reset()         { *m = Contact{} }
 func (m *Contact) String() string { return proto.CompactTextString(m) }
 func (*Contact) ProtoMessage()    {}
 func (*Contact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{10}
+	return fileDescriptor_d493abf9d07462f8, []int{3}
 }
 
 func (m *Contact) XXX_Unmarshal(b []byte) error {
@@ -713,13 +236,6 @@ func (m *Contact) GetEmail() string {
 	return ""
 }
 
-func (m *Contact) GetAbMode() int32 {
-	if m != nil {
-		return m.AbMode
-	}
-	return 0
-}
-
 func (m *Contact) GetChat() bool {
 	if m != nil {
 		return m.Chat
@@ -727,366 +243,42 @@ func (m *Contact) GetChat() bool {
 	return false
 }
 
-type LinkItem struct {
-	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Url                  string   `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *LinkItem) Reset()         { *m = LinkItem{} }
-func (m *LinkItem) String() string { return proto.CompactTextString(m) }
-func (*LinkItem) ProtoMessage()    {}
-func (*LinkItem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{11}
-}
-
-func (m *LinkItem) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_LinkItem.Unmarshal(m, b)
-}
-func (m *LinkItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_LinkItem.Marshal(b, m, deterministic)
-}
-func (m *LinkItem) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LinkItem.Merge(m, src)
-}
-func (m *LinkItem) XXX_Size() int {
-	return xxx_messageInfo_LinkItem.Size(m)
-}
-func (m *LinkItem) XXX_DiscardUnknown() {
-	xxx_messageInfo_LinkItem.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LinkItem proto.InternalMessageInfo
-
-func (m *LinkItem) GetTitle() string {
-	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *LinkItem) GetUrl() string {
-	if m != nil {
-		return m.Url
-	}
-	return ""
-}
-
-type Suggestions struct {
-	SuggestionsAvailable bool     `protobuf:"varint,1,opt,name=suggestions_available,json=suggestionsAvailable,proto3" json:"suggestions_available,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Suggestions) Reset()         { *m = Suggestions{} }
-func (m *Suggestions) String() string { return proto.CompactTextString(m) }
-func (*Suggestions) ProtoMessage()    {}
-func (*Suggestions) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{12}
-}
-
-func (m *Suggestions) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Suggestions.Unmarshal(m, b)
-}
-func (m *Suggestions) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Suggestions.Marshal(b, m, deterministic)
-}
-func (m *Suggestions) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Suggestions.Merge(m, src)
-}
-func (m *Suggestions) XXX_Size() int {
-	return xxx_messageInfo_Suggestions.Size(m)
-}
-func (m *Suggestions) XXX_DiscardUnknown() {
-	xxx_messageInfo_Suggestions.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Suggestions proto.InternalMessageInfo
-
-func (m *Suggestions) GetSuggestionsAvailable() bool {
-	if m != nil {
-		return m.SuggestionsAvailable
-	}
-	return false
-}
-
-type Note struct {
-	Enable               bool     `protobuf:"varint,1,opt,name=enable,proto3" json:"enable,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Note) Reset()         { *m = Note{} }
-func (m *Note) String() string { return proto.CompactTextString(m) }
-func (*Note) ProtoMessage()    {}
-func (*Note) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{13}
-}
-
-func (m *Note) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Note.Unmarshal(m, b)
-}
-func (m *Note) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Note.Marshal(b, m, deterministic)
-}
-func (m *Note) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Note.Merge(m, src)
-}
-func (m *Note) XXX_Size() int {
-	return xxx_messageInfo_Note.Size(m)
-}
-func (m *Note) XXX_DiscardUnknown() {
-	xxx_messageInfo_Note.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Note proto.InternalMessageInfo
-
-func (m *Note) GetEnable() bool {
-	if m != nil {
-		return m.Enable
-	}
-	return false
-}
-
-type Location struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Location) Reset()         { *m = Location{} }
-func (m *Location) String() string { return proto.CompactTextString(m) }
-func (*Location) ProtoMessage()    {}
-func (*Location) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{14}
-}
-
-func (m *Location) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Location.Unmarshal(m, b)
-}
-func (m *Location) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Location.Marshal(b, m, deterministic)
-}
-func (m *Location) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Location.Merge(m, src)
-}
-func (m *Location) XXX_Size() int {
-	return xxx_messageInfo_Location.Size(m)
-}
-func (m *Location) XXX_DiscardUnknown() {
-	xxx_messageInfo_Location.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Location proto.InternalMessageInfo
-
-type Widgets struct {
-	Header               *HeaderWidget     `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
-	Description          string            `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	ListData             []*ListWidgetItem `protobuf:"bytes,3,rep,name=list_data,json=listData,proto3" json:"list_data,omitempty"`
-	Location             *Location         `protobuf:"bytes,4,opt,name=location,proto3" json:"location,omitempty"`
-	Images               []string          `protobuf:"bytes,5,rep,name=images,proto3" json:"images,omitempty"`
-	Breadcrumb           *BreadCrumb       `protobuf:"bytes,6,opt,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
-	Contact              *Contact          `protobuf:"bytes,7,opt,name=contact,proto3" json:"contact,omitempty"`
-	Links                []*LinkItem       `protobuf:"bytes,8,rep,name=links,proto3" json:"links,omitempty"`
-	Suggestions          *Suggestions      `protobuf:"bytes,9,opt,name=suggestions,proto3" json:"suggestions,omitempty"`
-	Note                 *Note             `protobuf:"bytes,10,opt,name=note,proto3" json:"note,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
-}
-
-func (m *Widgets) Reset()         { *m = Widgets{} }
-func (m *Widgets) String() string { return proto.CompactTextString(m) }
-func (*Widgets) ProtoMessage()    {}
-func (*Widgets) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d493abf9d07462f8, []int{15}
-}
-
-func (m *Widgets) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Widgets.Unmarshal(m, b)
-}
-func (m *Widgets) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Widgets.Marshal(b, m, deterministic)
-}
-func (m *Widgets) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Widgets.Merge(m, src)
-}
-func (m *Widgets) XXX_Size() int {
-	return xxx_messageInfo_Widgets.Size(m)
-}
-func (m *Widgets) XXX_DiscardUnknown() {
-	xxx_messageInfo_Widgets.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Widgets proto.InternalMessageInfo
-
-func (m *Widgets) GetHeader() *HeaderWidget {
-	if m != nil {
-		return m.Header
-	}
-	return nil
-}
-
-func (m *Widgets) GetDescription() string {
-	if m != nil {
-		return m.Description
-	}
-	return ""
-}
-
-func (m *Widgets) GetListData() []*ListWidgetItem {
-	if m != nil {
-		return m.ListData
-	}
-	return nil
-}
-
-func (m *Widgets) GetLocation() *Location {
-	if m != nil {
-		return m.Location
-	}
-	return nil
-}
-
-func (m *Widgets) GetImages() []string {
-	if m != nil {
-		return m.Images
-	}
-	return nil
-}
-
-func (m *Widgets) GetBreadcrumb() *BreadCrumb {
-	if m != nil {
-		return m.Breadcrumb
-	}
-	return nil
-}
-
-func (m *Widgets) GetContact() *Contact {
-	if m != nil {
-		return m.Contact
-	}
-	return nil
-}
-
-func (m *Widgets) GetLinks() []*LinkItem {
-	if m != nil {
-		return m.Links
-	}
-	return nil
-}
-
-func (m *Widgets) GetSuggestions() *Suggestions {
-	if m != nil {
-		return m.Suggestions
-	}
-	return nil
-}
-
-func (m *Widgets) GetNote() *Note {
-	if m != nil {
-		return m.Note
-	}
-	return nil
-}
-
 func init() {
 	proto.RegisterType((*GetPostRequest)(nil), "postview.GetPostRequest")
 	proto.RegisterType((*GetPostResponse)(nil), "postview.GetPostResponse")
 	proto.RegisterType((*Post)(nil), "postview.Post")
-	proto.RegisterType((*PostData)(nil), "postview.PostData")
-	proto.RegisterType((*SEOData)(nil), "postview.SEOData")
-	proto.RegisterType((*ShareData)(nil), "postview.ShareData")
-	proto.RegisterType((*HeaderWidget)(nil), "postview.HeaderWidget")
-	proto.RegisterType((*ListWidgetItem)(nil), "postview.ListWidgetItem")
-	proto.RegisterType((*BreadCrumbCategory)(nil), "postview.BreadCrumbCategory")
-	proto.RegisterType((*BreadCrumb)(nil), "postview.BreadCrumb")
 	proto.RegisterType((*Contact)(nil), "postview.Contact")
-	proto.RegisterType((*LinkItem)(nil), "postview.LinkItem")
-	proto.RegisterType((*Suggestions)(nil), "postview.Suggestions")
-	proto.RegisterType((*Note)(nil), "postview.Note")
-	proto.RegisterType((*Location)(nil), "postview.Location")
-	proto.RegisterType((*Widgets)(nil), "postview.Widgets")
 }
 
 func init() { proto.RegisterFile("api/postview/postview.proto", fileDescriptor_d493abf9d07462f8) }
 
 var fileDescriptor_d493abf9d07462f8 = []byte{
-	// 1116 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0xdd, 0x6e, 0xdc, 0x44,
-	0x14, 0xd6, 0x66, 0xff, 0xbc, 0x67, 0xe9, 0x0f, 0x43, 0x5a, 0xb6, 0x21, 0x6a, 0x23, 0x23, 0x55,
-	0x41, 0x88, 0x5d, 0xba, 0xe5, 0xe7, 0x02, 0xa8, 0x94, 0xa4, 0x15, 0x0d, 0x84, 0x12, 0x39, 0x4d,
-	0x91, 0xb8, 0xb1, 0xc6, 0xf6, 0xc4, 0x3b, 0x8a, 0xed, 0x71, 0x67, 0xc6, 0x09, 0xf4, 0x8a, 0xa7,
-	0xe0, 0x45, 0x78, 0x05, 0x9e, 0x87, 0x0b, 0x9e, 0x00, 0xcd, 0x99, 0xf1, 0xcf, 0xb6, 0x0d, 0x42,
-	0xdc, 0xf9, 0x9c, 0xf3, 0xf9, 0xcc, 0xf9, 0xfb, 0xce, 0x0c, 0x7c, 0x40, 0x4b, 0xbe, 0x28, 0x85,
-	0xd2, 0x17, 0x9c, 0x5d, 0x36, 0x1f, 0xf3, 0x52, 0x0a, 0x2d, 0x88, 0x57, 0xcb, 0x5b, 0xdb, 0xa9,
-	0x10, 0x69, 0xc6, 0x16, 0xa8, 0x8f, 0xaa, 0xb3, 0x85, 0xd2, 0xb2, 0x8a, 0xb5, 0xc5, 0x6d, 0xdd,
-	0x7b, 0xdd, 0xaa, 0x79, 0xce, 0x94, 0xa6, 0x79, 0x69, 0x01, 0xfe, 0x7d, 0xb8, 0xfe, 0x2d, 0xd3,
-	0xc7, 0x42, 0xe9, 0x80, 0xbd, 0xac, 0x98, 0xd2, 0x64, 0x13, 0x86, 0x5a, 0x9c, 0xb3, 0x62, 0xd6,
-	0xdb, 0xe9, 0xed, 0x4e, 0x02, 0x2b, 0xf8, 0xdf, 0xc3, 0x8d, 0x06, 0xa7, 0x4a, 0x51, 0x28, 0x46,
-	0x7c, 0x18, 0x98, 0x28, 0x10, 0x37, 0x5d, 0x5e, 0x9f, 0x37, 0x21, 0x22, 0x0a, 0x6d, 0xc6, 0x19,
-	0x93, 0x52, 0xc8, 0xd9, 0xc6, 0x4e, 0x6f, 0x77, 0x18, 0x58, 0xc1, 0x7f, 0x09, 0x03, 0x83, 0x21,
-	0xf7, 0x61, 0x90, 0x50, 0x4d, 0x9d, 0x07, 0xb2, 0xee, 0xe1, 0x31, 0xd5, 0x34, 0x40, 0x3b, 0xf9,
-	0x18, 0xc6, 0x97, 0x3c, 0x49, 0x99, 0x56, 0xe8, 0x67, 0xba, 0x7c, 0xb7, 0x85, 0xfe, 0x64, 0x0d,
-	0x41, 0x8d, 0x68, 0xe3, 0xef, 0x77, 0xe3, 0xff, 0xbb, 0x07, 0x5e, 0xed, 0x95, 0x3c, 0x82, 0x1b,
-	0x05, 0x8d, 0x5e, 0x85, 0xa5, 0x14, 0x49, 0x15, 0xeb, 0x90, 0x27, 0x2e, 0x84, 0xdb, 0x73, 0x5b,
-	0xaf, 0x79, 0x5d, 0xaf, 0xf9, 0x0b, 0x9a, 0x55, 0x2c, 0xb8, 0x66, 0xe0, 0xc7, 0x16, 0x7d, 0x98,
-	0x90, 0xc7, 0x40, 0xa2, 0x4a, 0xf1, 0x82, 0x29, 0x15, 0xc6, 0x54, 0x26, 0xa1, 0xca, 0xaa, 0xd4,
-	0x85, 0x76, 0x95, 0x8b, 0x9b, 0xf5, 0x1f, 0x07, 0x54, 0x26, 0x27, 0x59, 0x95, 0x92, 0x0f, 0xa1,
-	0xaf, 0x98, 0xc0, 0x30, 0xd7, 0x32, 0x3a, 0x79, 0xf2, 0x23, 0xe6, 0x6e, 0xac, 0xe4, 0x23, 0x18,
-	0xaa, 0x15, 0x95, 0x6c, 0x36, 0x40, 0xd8, 0x7b, 0x1d, 0x98, 0x51, 0x23, 0xd0, 0x22, 0xc8, 0x4d,
-	0xe8, 0x57, 0x32, 0x9b, 0x0d, 0x31, 0x6d, 0xf3, 0xe9, 0xff, 0xb5, 0x01, 0x63, 0xe7, 0x0d, 0xcb,
-	0xc2, 0x75, 0xc6, 0x9a, 0xb6, 0x1a, 0x81, 0xec, 0xc0, 0x34, 0x61, 0x2a, 0x96, 0xbc, 0xd4, 0x5c,
-	0x14, 0x98, 0xc2, 0x24, 0xe8, 0xaa, 0x6a, 0xaf, 0xfd, 0xc6, 0x2b, 0xb9, 0x03, 0xde, 0x4a, 0xe4,
-	0x2c, 0x34, 0xea, 0x01, 0xaa, 0xc7, 0x46, 0x3e, 0x95, 0x19, 0xf9, 0x14, 0x36, 0x69, 0x91, 0x48,
-	0xc1, 0x93, 0xb0, 0xa4, 0xf1, 0x39, 0x4d, 0x59, 0x58, 0xd0, 0x9c, 0xb9, 0x98, 0x88, 0xb3, 0x1d,
-	0x5b, 0xd3, 0x33, 0x9a, 0x33, 0xb2, 0x0d, 0xc0, 0x85, 0x0a, 0x69, 0x59, 0x9a, 0x2e, 0x8c, 0x10,
-	0xe7, 0x71, 0xa1, 0xf6, 0xca, 0xf2, 0x30, 0x21, 0xf7, 0xe1, 0x46, 0xed, 0xcf, 0x20, 0xcc, 0x89,
-	0x63, 0x84, 0x5c, 0x73, 0xea, 0xbd, 0xb2, 0x34, 0xe7, 0xde, 0x85, 0x69, 0xed, 0xc5, 0x60, 0x3c,
-	0xc4, 0x4c, 0xac, 0x1b, 0x63, 0x7f, 0x0a, 0xc4, 0x76, 0x25, 0x64, 0xbf, 0x94, 0x5c, 0xb2, 0xd0,
-	0xd0, 0x60, 0x36, 0xc1, 0x92, 0x6e, 0xbd, 0xd1, 0xb0, 0xe7, 0x35, 0x47, 0x82, 0x9b, 0xd6, 0xf4,
-	0x04, 0x7f, 0x32, 0x6a, 0xb2, 0x0d, 0x13, 0xbd, 0xaa, 0xf2, 0xa8, 0xa0, 0x3c, 0x9b, 0x81, 0x3d,
-	0xa7, 0x51, 0xf8, 0xbf, 0xf7, 0x60, 0xd2, 0xf4, 0xe5, 0x7f, 0x97, 0xfc, 0x1e, 0x4c, 0xeb, 0xac,
-	0xdb, 0xd2, 0x83, 0x53, 0x99, 0x74, 0xde, 0x87, 0xb1, 0x49, 0xb7, 0x6d, 0xc0, 0x88, 0x0b, 0xe5,
-	0x0c, 0x97, 0x2c, 0x0a, 0xdb, 0x31, 0x18, 0x5d, 0xb2, 0xe8, 0x54, 0x66, 0x7e, 0x06, 0xef, 0x3c,
-	0x65, 0x34, 0x61, 0xd2, 0xd2, 0x85, 0x10, 0x64, 0x5e, 0x1d, 0x19, 0x7e, 0xb7, 0xe1, 0x6e, 0x74,
-	0xc3, 0x5d, 0x4b, 0xb8, 0xff, 0x5a, 0xc2, 0xe6, 0x9f, 0x32, 0xa3, 0x31, 0x73, 0x71, 0x58, 0xc1,
-	0x7f, 0x0e, 0xd7, 0x8f, 0xb8, 0xd2, 0xf6, 0xac, 0x43, 0xcd, 0xf2, 0x2b, 0x4a, 0x71, 0x1b, 0x46,
-	0x67, 0x42, 0xe6, 0x54, 0xbb, 0x23, 0x9d, 0x64, 0xd0, 0x17, 0x86, 0x34, 0x35, 0x85, 0x51, 0xf0,
-	0xff, 0xe8, 0x01, 0xd9, 0x97, 0x8c, 0x26, 0x07, 0xb2, 0xca, 0xa3, 0x03, 0xaa, 0x59, 0x2a, 0xe4,
-	0xaf, 0xa6, 0x5a, 0x25, 0x95, 0xac, 0xd0, 0x96, 0x85, 0xf6, 0x00, 0xb0, 0x2a, 0xe4, 0x19, 0x81,
-	0x41, 0xc3, 0xcf, 0x49, 0x80, 0xdf, 0xe4, 0x01, 0x78, 0x3c, 0x16, 0x45, 0x53, 0xdf, 0xab, 0x79,
-	0x3b, 0x36, 0x38, 0x53, 0xdb, 0x26, 0x85, 0x41, 0x37, 0x85, 0x7b, 0x30, 0x55, 0x2c, 0x16, 0x85,
-	0xdb, 0x01, 0xb6, 0xea, 0x60, 0x55, 0xe6, 0x74, 0xff, 0xb7, 0x1e, 0x40, 0x1b, 0x35, 0xf9, 0x1a,
-	0x20, 0xb6, 0x91, 0x73, 0xa6, 0x66, 0xbd, 0x9d, 0xfe, 0xee, 0x74, 0xb9, 0xdd, 0x92, 0xfa, 0xcd,
-	0xfc, 0x82, 0x0e, 0xde, 0x50, 0x2f, 0xa7, 0x3c, 0xc3, 0xb0, 0x6d, 0x3a, 0x63, 0x23, 0x9f, 0x5a,
-	0x56, 0x46, 0x54, 0xb1, 0xce, 0xc4, 0x8c, 0x8d, 0x6c, 0x9a, 0x1f, 0xc1, 0xf8, 0x40, 0x14, 0x9a,
-	0xc6, 0x58, 0xd9, 0x72, 0x25, 0x8a, 0xa6, 0x0f, 0x28, 0xe0, 0x96, 0x36, 0x7e, 0xea, 0xce, 0xa3,
-	0x60, 0x86, 0x89, 0x46, 0x61, 0x2e, 0x12, 0xdb, 0x87, 0x61, 0x30, 0xa2, 0xd1, 0x0f, 0x22, 0x61,
-	0xa6, 0xa0, 0xf1, 0x8a, 0x6a, 0x2c, 0x84, 0x17, 0xe0, 0xb7, 0xbf, 0x04, 0xef, 0x88, 0x17, 0xe7,
-	0xff, 0xd2, 0x6c, 0xb7, 0x48, 0x36, 0xda, 0xf5, 0xb4, 0x0f, 0xd3, 0x93, 0x2a, 0x4d, 0x99, 0x32,
-	0x53, 0xaf, 0xc8, 0x43, 0xb8, 0xa5, 0x5a, 0x31, 0xa4, 0x17, 0x94, 0x67, 0x34, 0x72, 0x6e, 0xbc,
-	0x60, 0xb3, 0x63, 0xdc, 0xab, 0x6d, 0xfe, 0x5d, 0x18, 0x3c, 0x13, 0x1a, 0x47, 0x89, 0x15, 0x1d,
-	0xb4, 0x93, 0x7c, 0x00, 0xef, 0x48, 0xc4, 0xd4, 0xfc, 0xe5, 0xff, 0xd9, 0x87, 0xb1, 0xbb, 0x2e,
-	0xc8, 0x1c, 0x46, 0x2b, 0x24, 0x44, 0xb3, 0xf9, 0x9b, 0x1e, 0x74, 0x89, 0x12, 0x38, 0xd4, 0x7f,
-	0x60, 0xed, 0xe7, 0x30, 0xc9, 0xb8, 0xd2, 0x21, 0xde, 0x68, 0x7d, 0x6c, 0xec, 0xac, 0x75, 0xba,
-	0xce, 0x87, 0xc0, 0x33, 0x50, 0x5c, 0x12, 0x73, 0xf0, 0x32, 0x17, 0xa0, 0xdb, 0xf1, 0x9d, 0x7b,
-	0xb0, 0x0e, 0x3d, 0x68, 0x30, 0x26, 0x51, 0x9e, 0xd3, 0x94, 0xa9, 0xd9, 0x70, 0xa7, 0x8f, 0xd4,
-	0x47, 0x89, 0x7c, 0x06, 0x10, 0x99, 0xe1, 0x89, 0xcd, 0xf0, 0xe0, 0x22, 0x9d, 0x2e, 0x37, 0xdf,
-	0x36, 0x58, 0x41, 0x07, 0x67, 0x6e, 0xd6, 0xd8, 0x8e, 0x06, 0x2e, 0xd6, 0xb5, 0x7b, 0xc8, 0xcd,
-	0x4c, 0x50, 0x23, 0xc8, 0x2e, 0x0c, 0x33, 0x5e, 0x9c, 0xab, 0x99, 0x87, 0xd9, 0x75, 0xe3, 0x74,
-	0xad, 0x0f, 0x2c, 0x80, 0x7c, 0x09, 0xd3, 0x4e, 0xb7, 0xdc, 0xa2, 0xbd, 0xd5, 0xb9, 0xbb, 0x5a,
-	0x63, 0xd0, 0x45, 0x9a, 0x37, 0x45, 0x21, 0x34, 0xc3, 0xcd, 0xba, 0xf6, 0xa6, 0x30, 0x4d, 0x0e,
-	0xd0, 0xb6, 0xfc, 0xce, 0xde, 0xe4, 0x2f, 0x38, 0xbb, 0x24, 0x8f, 0x60, 0xec, 0x9e, 0x25, 0xa4,
-	0x53, 0xec, 0xf5, 0x17, 0xcd, 0xd6, 0x9d, 0xb7, 0x58, 0xec, 0x1b, 0x66, 0xff, 0x9b, 0x9f, 0xbf,
-	0x4a, 0xb9, 0x9e, 0xc7, 0xf4, 0x8c, 0x45, 0xf4, 0x15, 0xa5, 0x72, 0xce, 0xe5, 0x82, 0xca, 0x98,
-	0x16, 0x74, 0xf9, 0xc5, 0x83, 0x45, 0x2a, 0x32, 0x5a, 0xa4, 0x9f, 0x44, 0x82, 0x67, 0x4c, 0x96,
-	0x19, 0xd5, 0x6c, 0x51, 0x9e, 0xa7, 0xcd, 0x63, 0x2c, 0x1a, 0xe1, 0xb2, 0x78, 0xf8, 0x4f, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x00, 0x11, 0x9b, 0x84, 0xac, 0x09, 0x00, 0x00,
+	// 394 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x52, 0xcf, 0x8b, 0xd4, 0x30,
+	0x14, 0x66, 0x77, 0xbb, 0xdb, 0x99, 0x8c, 0x8e, 0x18, 0x3c, 0xd4, 0x51, 0x70, 0x28, 0x28, 0x0b,
+	0x62, 0x8b, 0x23, 0x7a, 0x91, 0x15, 0xd4, 0x83, 0xe8, 0x49, 0xaa, 0x78, 0xf0, 0xb2, 0xbc, 0x76,
+	0xdf, 0xa4, 0x61, 0xd2, 0x24, 0x36, 0xaf, 0x0e, 0x7a, 0xf7, 0xff, 0x96, 0xa4, 0xd3, 0x76, 0x04,
+	0x6f, 0xf9, 0x7e, 0x34, 0xf9, 0xde, 0xf7, 0xca, 0x1e, 0x80, 0x95, 0xb9, 0x35, 0x8e, 0x7e, 0x4a,
+	0xdc, 0x8f, 0x87, 0xcc, 0xb6, 0x86, 0x0c, 0x9f, 0x0d, 0x78, 0xf5, 0x48, 0x18, 0x23, 0x14, 0xe6,
+	0x81, 0x2f, 0xbb, 0x6d, 0x4e, 0xb2, 0x41, 0x47, 0xd0, 0xd8, 0xde, 0x9a, 0x3e, 0x61, 0xcb, 0x0f,
+	0x48, 0x9f, 0x8d, 0xa3, 0x02, 0x7f, 0x74, 0xe8, 0x88, 0xdf, 0x63, 0xe7, 0x64, 0x76, 0xa8, 0x93,
+	0x93, 0xf5, 0xc9, 0xe5, 0xbc, 0xe8, 0x41, 0xfa, 0x92, 0xdd, 0x19, 0x7d, 0xce, 0x1a, 0xed, 0x90,
+	0xa7, 0x2c, 0xf2, 0xef, 0x04, 0xdf, 0x62, 0xb3, 0xcc, 0xc6, 0x10, 0xc1, 0x15, 0xb4, 0xf4, 0xcf,
+	0x29, 0x8b, 0x3c, 0x0c, 0xb7, 0x4a, 0x52, 0x38, 0xde, 0xea, 0x01, 0x5f, 0xb3, 0xc5, 0x0d, 0xba,
+	0xaa, 0x95, 0x96, 0xa4, 0xd1, 0xc9, 0x69, 0xd0, 0x8e, 0xa9, 0x29, 0xcd, 0xd9, 0x51, 0x1a, 0xfe,
+	0x90, 0xcd, 0xa9, 0xee, 0x9a, 0x52, 0x83, 0x54, 0x49, 0x14, 0x94, 0x89, 0xe0, 0x4f, 0x59, 0x5c,
+	0x19, 0x4d, 0x50, 0x51, 0x72, 0x1e, 0xb2, 0xdd, 0x9d, 0xb2, 0xbd, 0xef, 0x85, 0x62, 0x70, 0xf0,
+	0x2b, 0x76, 0xcb, 0x76, 0xa5, 0x92, 0xae, 0xc6, 0x9b, 0x6b, 0xa0, 0xe4, 0x22, 0x7c, 0xb1, 0xca,
+	0xfa, 0xe2, 0xb2, 0xa1, 0xb8, 0xec, 0xeb, 0x50, 0x5c, 0xb1, 0x18, 0xfd, 0x6f, 0x89, 0x3f, 0x66,
+	0xcb, 0x0a, 0x08, 0x85, 0x69, 0x7f, 0x5d, 0x3b, 0xd5, 0x09, 0x97, 0xc4, 0xeb, 0xb3, 0xcb, 0x79,
+	0x71, 0x7b, 0x60, 0xbf, 0x78, 0x32, 0xfd, 0xc8, 0xe2, 0xc3, 0xcb, 0x7e, 0x22, 0x5b, 0x1b, 0x3d,
+	0x36, 0x11, 0x80, 0x67, 0xb1, 0xf1, 0xd3, 0xf4, 0x1d, 0xf4, 0x80, 0x73, 0x16, 0x55, 0x35, 0x50,
+	0x18, 0x71, 0x56, 0x84, 0xf3, 0xe6, 0x13, 0x9b, 0xf9, 0x46, 0xbf, 0x49, 0xdc, 0xf3, 0x37, 0x2c,
+	0x3e, 0x6c, 0x85, 0x27, 0xd3, 0x8c, 0xff, 0x2e, 0x74, 0x75, 0xff, 0x3f, 0x4a, 0xbf, 0xc2, 0x77,
+	0x57, 0xdf, 0x5f, 0x0b, 0x49, 0x59, 0x05, 0x5b, 0x2c, 0xe1, 0x37, 0x40, 0x9b, 0xc9, 0x36, 0x87,
+	0xb6, 0x02, 0x0d, 0x9b, 0x57, 0xcf, 0x73, 0x61, 0x14, 0x68, 0xf1, 0xac, 0x34, 0x52, 0x61, 0x6b,
+	0x15, 0x10, 0xe6, 0x76, 0x27, 0xc6, 0xbf, 0xad, 0xbc, 0x08, 0xed, 0xbc, 0xf8, 0x1b, 0x00, 0x00,
+	0xff, 0xff, 0x41, 0x82, 0xbe, 0x4a, 0x8d, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1124,14 +316,6 @@ func (c *postViewClient) GetPost(ctx context.Context, in *GetPostRequest, opts .
 // PostViewServer is the server API for PostView service.
 type PostViewServer interface {
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
-}
-
-// UnimplementedPostViewServer can be embedded to have forward compatible implementations.
-type UnimplementedPostViewServer struct {
-}
-
-func (*UnimplementedPostViewServer) GetPost(ctx context.Context, req *GetPostRequest) (*GetPostResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
 
 func RegisterPostViewServer(s *grpc.Server, srv PostViewServer) {
