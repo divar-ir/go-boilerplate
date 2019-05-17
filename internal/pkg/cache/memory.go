@@ -12,7 +12,7 @@ type memoryCache struct {
 	items sync.Map
 }
 
-func NewMemory() postview.PostCache {
+func NewMemory() PostCache {
 	return &memoryCache{}
 }
 

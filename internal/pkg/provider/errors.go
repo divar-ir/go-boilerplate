@@ -1,4 +1,4 @@
-package postview
+package provider
 
 import "errors"
 

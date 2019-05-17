@@ -11,19 +11,20 @@ type memoryProvider struct {
 	items sync.Map
 }
 
-func NewMemory() postview.PostProvider {
+func NewMemory() PostProvider {
 	return &memoryProvider{}
 }
 
 func (provider *memoryProvider) GetPost(ctx context.Context, token string) (*postview.Post, error) {
 	value, ok := provider.items.Load(token)
 	if !ok {
-		return nil, postview.ErrNotFound
+		return nil, ErrNotFound
 	}
 
 	return value.(*postview.Post), nil
 }
 
-func (provider *memoryProvider) Add(post *postview.Post) {
+func (provider *memoryProvider) AddPost(ctx context.Context, post *postview.Post) error {
 	provider.items.Store(post.Token, post)
+	return nil
 }
