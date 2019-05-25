@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 	"github.com/sirupsen/logrus"
@@ -12,6 +18,10 @@ import (
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	"google.golang.org/grpc"
+
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 )
 
 var serveCmd = &cobra.Command{
@@ -40,12 +50,44 @@ func serve(cmd *cobra.Command, args []string) {
 		panicWithError(err, "failed to listen")
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := configureServer(config)
 	postview.RegisterPostViewServer(grpcServer, servicer)
 
-	if err := grpcServer.Serve(listener); err != nil {
-		panicWithError(err, "failed to serve")
+	serverCtx, serverCancel := makeServerCtx()
+	defer serverCancel()
+	var serverWaitGroup sync.WaitGroup
+
+	serverWaitGroup.Add(1)
+	go func() {
+		defer serverWaitGroup.Done()
+
+		if err := grpcServer.Serve(listener); err != nil {
+			panicWithError(err, "failed to serve")
+		}
+	}()
+
+	if err := declareReadiness(); err != nil {
+		log.Fatal(err)
 	}
+
+	<-serverCtx.Done()
+
+	grpcServer.GracefulStop()
+
+	serverWaitGroup.Wait()
+}
+
+func configureServer(config *Config) *grpc.Server {
+	logEntry := logrus.WithFields(map[string]interface{}{
+		"app": "postviewd",
+	})
+
+	interceptors := []grpc.UnaryServerInterceptor{
+		grpc_logrus.UnaryServerInterceptor(logEntry),
+		grpc_recovery.UnaryServerInterceptor(),
+	}
+
+	return grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptors...)))
 }
 
 func loadConfigOrPanic(cmd *cobra.Command) *Config {
@@ -60,6 +102,35 @@ func configureLoggerOrPanic(loggerConfig LoggingConfig) {
 	if err := configureLogging(&loggerConfig); err != nil {
 		panicWithError(err, "Failed to configure logger.")
 	}
+}
+
+func makeServerCtx() (context.Context, context.CancelFunc) {
+	gracefulStop := make(chan os.Signal)
+
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		<-gracefulStop
+		cancel()
+	}()
+
+	return ctx, cancel
+}
+
+func declareReadiness() error {
+	// nolint: gosec
+	file, err := os.Create("/tmp/readiness")
+	if err != nil {
+		return err
+	}
+	// nolint: errcheck
+	defer file.Close()
+
+	_, err = file.WriteString("ready")
+	return err
 }
 
 func panicWithError(err error, format string, args ...interface{}) {
