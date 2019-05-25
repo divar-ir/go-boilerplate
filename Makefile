@@ -26,7 +26,7 @@ clean: ## to remove generated files
 	-find . -type d -name mocks -exec rm -rf \{} +
 
 postviewd: $(SRCS) $(PBS) ## Compile postview daemon
-	go build -o $@ ./cmd/$@
+	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/$@
 
 lint: .bin/golangci-lint ## to lint the files
 	.bin/golangci-lint run --config=.golangci-lint.yml ./...
@@ -74,9 +74,16 @@ $(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(d
 	go get -v github.com/vektra/mockery/.../
 
 # Variables
+ROOT := git.cafebazaar.ir/arcana261/golang-boilerplate
+
 PROTOC ?= protoc
 PROTOC_OPTIONS ?=
 LINTER_VERSION = v1.12.5
+GIT ?= git
+COMMIT := $(shell $(GIT) rev-parse HEAD)
+VERSION ?= $(strip $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),$(shell $(GIT) describe --tag 2> /dev/null || echo "$(COMMIT)")))
+BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
+LD_FLAGS := -X $(ROOT)/pkg/postview.Version=$(VERSION) -X $(ROOT)/pkg/postview.Commit=$(COMMIT) -X $(ROOT)/pkg/postview.BuildTime=$(BUILD_TIME)
 
 # Helper Variables
 
