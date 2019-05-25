@@ -9,6 +9,7 @@ import (
 
 // Config the application's configuration structure
 type Config struct {
+	Logging    LoggingConfig
 	ConfigFile string
 	ListenPort int
 }
@@ -16,6 +17,8 @@ type Config struct {
 // LoadConfig loads the config from a file if specified, otherwise from the environment
 func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	// Setting defaults for this application
+	viper.SetDefault("logging.SentryEnabled", false)
+	viper.SetDefault("logging.level", "error")
 	viper.SetDefault("listenPort", 8080)
 
 	// Read Config from ENV

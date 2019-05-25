@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
@@ -28,6 +28,8 @@ func serve(cmd *cobra.Command, args []string) {
 	printVersion()
 
 	config := loadConfigOrPanic(cmd)
+
+	configureLoggerOrPanic(config.Logging)
 
 	providerInstance := provider.NewMemory()
 	cacheInstance := cache.NewMemory()
@@ -54,6 +56,12 @@ func loadConfigOrPanic(cmd *cobra.Command) *Config {
 	return config
 }
 
+func configureLoggerOrPanic(loggerConfig LoggingConfig) {
+	if err := configureLogging(&loggerConfig); err != nil {
+		panicWithError(err, "Failed to configure logger.")
+	}
+}
+
 func panicWithError(err error, format string, args ...interface{}) {
-	log.Fatalf("ERR: %v\n%s", err, fmt.Sprintf(format, args...))
+	logrus.WithError(err).Panicf(format, args...)
 }

@@ -2,8 +2,9 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
@@ -31,8 +32,9 @@ func New(provider provider.PostProvider, cache cache.PostCache) postview.PostVie
 func (c *core) GetPost(ctx context.Context, request *postview.GetPostRequest) (*postview.GetPostResponse, error) {
 	post, ok, err := c.cache.Get(ctx, request.Token)
 	if err != nil {
-		// TODO:‌ logging
-		fmt.Println(err)
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"token": request.Token,
+		}).Error("failed to load data from cache")
 	}
 
 	if !ok {
@@ -47,8 +49,9 @@ func (c *core) GetPost(ctx context.Context, request *postview.GetPostRequest) (*
 
 		err = c.cache.Set(ctx, post, cacheExpireTime)
 		if err != nil {
-			//‌TODO: logging
-			fmt.Println(err)
+			logrus.WithError(err).WithFields(map[string]interface{}{
+				"token": request.Token,
+			}).Error("failed to set data in cache")
 		}
 	}
 
