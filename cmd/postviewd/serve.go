@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -22,6 +24,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 )
 
 var serveCmd = &cobra.Command{
@@ -40,6 +43,9 @@ func serve(cmd *cobra.Command, args []string) {
 	config := loadConfigOrPanic(cmd)
 
 	configureLoggerOrPanic(config.Logging)
+
+	prometheusMetricServer := startPrometheusMetricServerOrPanic(config.MetricListenPort)
+	defer shutdownPrometheusMetricServerOrPanic(prometheusMetricServer)
 
 	providerInstance := provider.NewMemory()
 	cacheInstance := cache.NewMemory()
@@ -84,6 +90,7 @@ func configureServer(config *Config) *grpc.Server {
 
 	interceptors := []grpc.UnaryServerInterceptor{
 		grpc_logrus.UnaryServerInterceptor(logEntry),
+		grpc_prometheus.UnaryClientInterceptor,
 		grpc_recovery.UnaryServerInterceptor(),
 	}
 
@@ -118,6 +125,29 @@ func makeServerCtx() (context.Context, context.CancelFunc) {
 	}()
 
 	return ctx, cancel
+}
+
+func startPrometheusMetricServerOrPanic(listenPort int) *http.Server {
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", listenPort),
+		Handler: promhttp.Handler(),
+	}
+
+	go listenAndServePrometheusMetrics(server)
+
+	return server
+}
+
+func listenAndServePrometheusMetrics(server *http.Server) {
+	if err := server.ListenAndServe(); err != nil {
+		panicWithError(err, "failed to start liveness http probe listener")
+	}
+}
+
+func shutdownPrometheusMetricServerOrPanic(server *http.Server) {
+	if err := server.Shutdown(context.Background()); err != nil {
+		panicWithError(err, "Failed to shutdown prometheus metric server")
+	}
 }
 
 func declareReadiness() error {
