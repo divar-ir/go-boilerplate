@@ -90,7 +90,7 @@ func configureServer(config *Config) *grpc.Server {
 
 	interceptors := []grpc.UnaryServerInterceptor{
 		grpc_logrus.UnaryServerInterceptor(logEntry),
-		grpc_prometheus.UnaryClientInterceptor,
+		grpc_prometheus.UnaryServerInterceptor,
 		grpc_recovery.UnaryServerInterceptor(),
 	}
 
