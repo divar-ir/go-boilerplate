@@ -1,6 +1,7 @@
-.PHONY: help generate lint fmt dependencies clean check .remove_empty_dirs
+.PHONY: help generate lint fmt dependencies clean check coverage .remove_empty_dirs
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
+PACKAGES := $(shell go list ./... | grep -v /vendor)
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
 PBS = $(patsubst %.proto,%.pb.go,$(patsubst api%,pkg%,$(PROTOS)))
 MOCK_PACKAGES = \
@@ -39,6 +40,19 @@ fmt: ## to run `go fmt` on all source code
 check: | generate ## Run tests
 	go test ./...
 
+coverage: coverage.cover coverage.html ## to run tests and generate test coverage data
+	gocov convert $< | gocov report
+
+coverage.html: coverage.cover
+	go tool cover -html=$< -o $@
+
+coverage.cover: $(SRCS) $(PBS) Makefile | generate
+	-rm -rfv .coverage
+	mkdir -p .coverage
+	$(foreach pkg,$(PACKAGES),go test -timeout 30s -short -covermode=count -coverprofile=.coverage/$(subst /,-,$(pkg)).cover $(pkg)${\n})
+	echo "mode: count" > $@
+	grep -h -v "^mode:" .coverage/*.cover >> $@
+
 .SECONDEXPANSION:
 $(PBS): $$(patsubst %.pb.go,%.proto,$$(patsubst pkg%,api%,$$@)) | .pre-check-go
 	protoc -I. --go_out=plugins=grpc:$(GOPATH)/src ./$<
@@ -60,3 +74,13 @@ $(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(d
 PROTOC ?= protoc
 PROTOC_OPTIONS ?=
 LINTER_VERSION = v1.12.5
+
+# Helper Variables
+
+# a variable containing a new line e.g.
+# ${\n} would emit a new line
+# useful in $(foreach functions
+define \n
+
+
+endef

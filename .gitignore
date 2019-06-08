@@ -1,3 +1,7 @@
 /postviewd
 /.bin
 mocks
+.vscode/
+.coverage
+*.cover
+/coverage.html
