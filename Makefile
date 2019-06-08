@@ -1,4 +1,4 @@
-.PHONY: help generate lint fmt dependencies clean check coverage .remove_empty_dirs
+.PHONY: help generate lint fmt dependencies clean check coverage race .remove_empty_dirs
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
 PACKAGES := $(shell go list ./... | grep -v /vendor)
@@ -39,6 +39,9 @@ fmt: ## to run `go fmt` on all source code
 
 check: | generate ## Run tests
 	go test ./...
+
+race: | generate ## to run data race detector
+	go test -timeout 30s -race ./...
 
 coverage: coverage.cover coverage.html ## to run tests and generate test coverage data
 	gocov convert $< | gocov report
