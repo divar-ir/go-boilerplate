@@ -47,8 +47,8 @@ func serve(cmd *cobra.Command, args []string) {
 	prometheusMetricServer := startPrometheusMetricServerOrPanic(config.MetricListenPort)
 	defer shutdownPrometheusMetricServerOrPanic(prometheusMetricServer)
 
-	providerInstance := provider.NewMemory()
-	cacheInstance := cache.NewMemory()
+	providerInstance := getProvider(config)
+	cacheInstance := getCache(config)
 	servicer := core.New(providerInstance, cacheInstance)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", config.ListenPort))
@@ -81,6 +81,26 @@ func serve(cmd *cobra.Command, args []string) {
 	grpcServer.GracefulStop()
 
 	serverWaitGroup.Wait()
+}
+
+func getProvider(config *Config) provider.PostProvider {
+	providerInstance := provider.NewMemory()
+	providerInstance = provider.NewInstrumentationMiddleware(
+		providerInstance, postProviderMetrics.With(map[string]string{
+			"provider_type": "memory",
+		}))
+
+	return providerInstance
+}
+
+func getCache(config *Config) cache.PostCache {
+	cacheInstance := cache.NewMemory()
+	cacheInstance = cache.NewInstrumentationMiddleware(
+		cacheInstance, cacheMetrics.With(map[string]string{
+			"cache_type": "memory",
+		}))
+
+	return cacheInstance
 }
 
 func configureServer(config *Config) *grpc.Server {
