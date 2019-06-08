@@ -3,8 +3,11 @@ package main
 import (
 	"strings"
 
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // Config the application's configuration structure
@@ -13,6 +16,7 @@ type Config struct {
 	ConfigFile       string
 	ListenPort       int
 	MetricListenPort int
+	Database         sql.PostgresConfig
 }
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
@@ -22,6 +26,14 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	viper.SetDefault("logging.level", "error")
 	viper.SetDefault("listenPort", 8080)
 	viper.SetDefault("metricListenPort", 8081)
+	viper.SetDefault("database.host", "127.0.0.1")
+	viper.SetDefault("database.port", 5432)
+	viper.SetDefault("database.username", "postgres")
+	viper.SetDefault("database.password", "")
+	viper.SetDefault("database.database", "postview")
+	viper.SetDefault("database.ssl", false)
+	viper.SetDefault("database.maxIdleConnection", 0)
+	viper.SetDefault("database.maxOpenConnection", 0)
 
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

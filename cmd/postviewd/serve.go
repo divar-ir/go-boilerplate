@@ -19,6 +19,7 @@ import (
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
 	"google.golang.org/grpc"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -84,10 +85,17 @@ func serve(cmd *cobra.Command, args []string) {
 }
 
 func getProvider(config *Config) provider.PostProvider {
-	providerInstance := provider.NewMemory()
+	db, err := sql.GetDatabase(config.Database)
+	if err != nil {
+		logrus.WithError(err).WithField(
+			"database", config.Database).Panic("failed to connect to DB")
+		return nil
+	}
+
+	providerInstance := provider.NewSQL(db)
 	providerInstance = provider.NewInstrumentationMiddleware(
 		providerInstance, postProviderMetrics.With(map[string]string{
-			"provider_type": "memory",
+			"provider_type": "postgres",
 		}))
 
 	return providerInstance
