@@ -1,4 +1,4 @@
-.PHONY: help generate lint fmt
+.PHONY: help generate lint fmt dependencies
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
@@ -10,6 +10,9 @@ help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 generate: $(PBS) ## Generate all auto-generated files
+
+dependencies: | .pre-check-go ## to install the dependencies
+	go get -v ./...
 
 postviewd: $(SRCS) $(PBS) ## Compile postview daemon
 	go build -o $@ ./cmd/$@
