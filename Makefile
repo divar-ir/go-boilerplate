@@ -6,7 +6,8 @@ PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
 PBS = $(patsubst %.proto,%.pb.go,$(patsubst api%,pkg%,$(PROTOS)))
 MOCK_PACKAGES = \
 	internal/pkg/cache \
-	internal/pkg/provider
+	internal/pkg/provider \
+	internal/pkg/metrics
 
 MOCKED_FILES = $(shell find . -name DOES_NOT_EXIST_FILE $(patsubst %,-or -path "./%/mocks/*.go",$(MOCK_PACKAGES)))
 MOCKED_FOLDERS = $(patsubst %,%/mocks,$(MOCK_PACKAGES))
