@@ -1,4 +1,4 @@
-.PHONY: help generate lint
+.PHONY: help generate lint fmt
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
@@ -19,6 +19,9 @@ lint: .bin/golangci-lint ## to lint the files
 
 .bin/golangci-lint:
 	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b .bin/ $(LINTER_VERSION)
+
+fmt: ## to run `go fmt` on all source code
+	gofmt -s -w $(SRCS)
 
 .SECONDEXPANSION:
 $(PBS): $$(patsubst %.pb.go,%.proto,$$(patsubst pkg%,api%,$$@)) | .pre-check-go
