@@ -29,20 +29,20 @@ func (s *MemoryCacheTestSuite) TestShouldReturnFalseInitially() {
 }
 
 func (s *MemoryCacheTestSuite) TestShouldReturnTrueAfterSet() {
-	s.cache.Set(context.Background(), &postview.Post{
+	s.Nil(s.cache.Set(context.Background(), &postview.Post{
 		Title: "a title",
 		Token: "token",
-	}, 1*time.Second)
+	}, 1*time.Second))
 	_, ok, err := s.cache.Get(context.Background(), "token")
 	s.Nil(err)
 	s.True(ok)
 }
 
 func (s *MemoryCacheTestSuite) TestShouldGetAfterSet() {
-	s.cache.Set(context.Background(), &postview.Post{
+	s.Nil(s.cache.Set(context.Background(), &postview.Post{
 		Title: "a title",
 		Token: "token",
-	}, 1*time.Second)
+	}, 1*time.Second))
 	post, _, err := s.cache.Get(context.Background(), "token")
 	s.Nil(err)
 	s.Equal("a title", post.Title)
