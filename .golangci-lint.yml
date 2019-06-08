@@ -1,0 +1,37 @@
+# options for analysis running
+run:
+  concurrency: 1
+  deadline: 5m
+
+  # include test files or not
+  tests: true
+
+  skip-dirs:
+    - mocks
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle
+  format: colored-line-number
+
+# all available settings of specific linters
+linters-settings:
+  lll:
+    line-length: 120
+
+linters:
+  enable:
+    - golint
+    - errcheck
+    - megacheck
+    - deadcode
+    - varcheck
+    - structcheck
+    - unconvert
+    - ineffassign
+    - gofmt
+    - lll
+    - gosec
+    - interfacer
+    - govet
+    - gosimple
