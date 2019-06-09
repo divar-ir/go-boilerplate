@@ -42,18 +42,18 @@ func (s *HistogramTestSuite) TestShouldApplyLabels() {
 }
 
 func (s *HistogramTestSuite) TestShouldNotHaveDataRaceOnConcurrentAccessWithLabel() {
-	const N_ROUTINES = 10
+	const NumberOfGoRoutines = 10
 
 	metric := prometheus.NewHistogram("concurrent_histogram_metric_with_label", "a sample metric", "my_label")
 	var started sync.WaitGroup
 	var beginOperating sync.WaitGroup
 	var testFinished sync.WaitGroup
 
-	started.Add(N_ROUTINES)
-	testFinished.Add(N_ROUTINES)
+	started.Add(NumberOfGoRoutines)
+	testFinished.Add(NumberOfGoRoutines)
 	beginOperating.Add(1)
 
-	for i := 0; i < N_ROUTINES; i++ {
+	for i := 0; i < NumberOfGoRoutines; i++ {
 		go func() {
 			defer testFinished.Done()
 
