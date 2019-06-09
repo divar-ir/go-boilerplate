@@ -7,6 +7,7 @@ import (
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/xerrors"
 )
 
 type MemoryProviderTestSuite struct {
@@ -21,7 +22,7 @@ func TestMemoryProviderTestSuite(t *testing.T) {
 
 func (s *MemoryProviderTestSuite) TestShouldReturnNotFoundInitially() {
 	_, err := s.provider.GetPost(context.Background(), "token")
-	s.Equal(provider.ErrNotFound, err)
+	s.True(xerrors.Is(err, provider.ErrNotFound))
 }
 
 func (s *MemoryProviderTestSuite) TestShouldReturnPostAfterAdd() {
