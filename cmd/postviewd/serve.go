@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/go-redis/redis"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -102,10 +103,11 @@ func getProvider(config *Config) provider.PostProvider {
 }
 
 func getCache(config *Config) cache.PostCache {
-	cacheInstance := cache.NewMemory()
+	redisClient := redis.NewClient(&redis.Options{Addr: config.Cache.Address})
+	cacheInstance := cache.NewRedis(redisClient, config.Cache.Prefix)
 	cacheInstance = cache.NewInstrumentationMiddleware(
 		cacheInstance, cacheMetrics.With(map[string]string{
-			"cache_type": "memory",
+			"cache_type": "redis",
 		}))
 
 	return cacheInstance

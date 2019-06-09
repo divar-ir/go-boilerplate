@@ -17,6 +17,12 @@ type Config struct {
 	ListenPort       int
 	MetricListenPort int
 	Database         sql.PostgresConfig
+	Cache            CacheConfig
+}
+
+type CacheConfig struct {
+	Address string
+	Prefix  string
 }
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
@@ -34,6 +40,8 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	viper.SetDefault("database.ssl", false)
 	viper.SetDefault("database.maxIdleConnection", 0)
 	viper.SetDefault("database.maxOpenConnection", 0)
+	viper.SetDefault("cache.address", "127.0.0.1:6379")
+	viper.SetDefault("cache.prefix", "DIVAR_POST_VIEW")
 
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
