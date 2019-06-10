@@ -19,6 +19,7 @@ import (
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
 	"google.golang.org/grpc"
@@ -120,6 +121,7 @@ func configureServer(config *Config) *grpc.Server {
 
 	interceptors := []grpc.UnaryServerInterceptor{
 		grpc_logrus.UnaryServerInterceptor(logEntry),
+		errors.UnaryServerInterceptor,
 		grpc_prometheus.UnaryServerInterceptor,
 		grpc_recovery.UnaryServerInterceptor(),
 	}

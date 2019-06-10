@@ -9,6 +9,7 @@ import (
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/xerrors"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
@@ -25,7 +26,7 @@ func TestSQLProviderTestSuite(t *testing.T) {
 
 func (s *SQLProviderTestSuite) TestGetPostShouldReturnNotFoundInitially() {
 	_, err := s.provider.GetPost(context.Background(), "myToken")
-	s.Equal(provider.ErrNotFound, err)
+	s.True(xerrors.Is(err, provider.ErrNotFound))
 }
 
 func (s *SQLProviderTestSuite) TestShouldReturnPostAfterAdd() {

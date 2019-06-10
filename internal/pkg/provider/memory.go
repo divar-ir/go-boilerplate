@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 )
 
@@ -18,7 +19,9 @@ func NewMemory() PostProvider {
 func (provider *memoryProvider) GetPost(ctx context.Context, token string) (*postview.Post, error) {
 	value, ok := provider.items.Load(token)
 	if !ok {
-		return nil, ErrNotFound
+		return nil, errors.WrapWithExtra(ErrNotFound, "post not found", map[string]interface{}{
+			"token": token,
+		})
 	}
 
 	return value.(*postview.Post), nil

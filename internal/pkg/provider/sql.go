@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"github.com/golang/protobuf/proto"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
@@ -38,14 +39,20 @@ func (p sqlProvider) GetPost(ctx context.Context, token string) (*postview.Post,
 	err := p.db.Where("token = ?", token).First(postInstance).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, ErrNotFound
+			return nil, errors.WrapWithExtra(ErrNotFound, "post not found", map[string]interface{}{
+				"token": token,
+			})
 		}
-		return nil, err
+		return nil, errors.WrapWithExtra(err, "could not read post from db", map[string]interface{}{
+			"token": token,
+		})
 	}
 
 	result, err := p.modelToProto(postInstance)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapWithExtra(err, "could not convert model to proto", map[string]interface{}{
+			"token": token,
+		})
 	}
 
 	return result, nil
@@ -54,10 +61,19 @@ func (p sqlProvider) GetPost(ctx context.Context, token string) (*postview.Post,
 func (p sqlProvider) AddPost(ctx context.Context, protoPost *postview.Post) error {
 	modelInstance, err := p.protoToModel(protoPost)
 	if err != nil {
-		return err
+		return errors.WrapWithExtra(err, "could not convert proto to model", map[string]interface{}{
+			"post": protoPost,
+		})
 	}
 
-	return p.db.Create(modelInstance).Error
+	err = p.db.Create(modelInstance).Error
+	if err != nil {
+		return errors.WrapWithExtra(err, "could not add model to db", map[string]interface{}{
+			"post": protoPost,
+		})
+	}
+
+	return nil
 }
 
 func (p sqlProvider) Migrate() error {
@@ -86,7 +102,7 @@ func (p sqlProvider) Migrate() error {
 func (p sqlProvider) protoToModel(protoPost *postview.Post) (*post, error) {
 	binaryData, err := proto.Marshal(protoPost)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not marshal proto")
 	}
 
 	data := base64.StdEncoding.EncodeToString(binaryData)
@@ -100,13 +116,13 @@ func (p sqlProvider) protoToModel(protoPost *postview.Post) (*post, error) {
 func (p sqlProvider) modelToProto(m *post) (*postview.Post, error) {
 	data, err := base64.StdEncoding.DecodeString(m.Data)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not decode base64")
 	}
 
 	var result postview.Post
 	err = proto.Unmarshal(data, &result)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not unmarshal proto")
 	}
 
 	return &result, nil

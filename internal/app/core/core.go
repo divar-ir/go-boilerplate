@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -40,11 +41,13 @@ func (c *core) GetPost(ctx context.Context, request *postview.GetPostRequest) (*
 	if !ok {
 		post, err = c.provider.GetPost(ctx, request.Token)
 		if err != nil {
-			if err == provider.ErrNotFound {
+			if xerrors.Is(err, provider.ErrNotFound) {
 				return nil, status.Error(codes.NotFound, "post not found")
 			}
 
-			return nil, err
+			return nil, errors.WrapWithExtra(err, "failed to acquire post", map[string]interface{}{
+				"request": request,
+			})
 		}
 
 		err = c.cache.Set(ctx, post, cacheExpireTime)
