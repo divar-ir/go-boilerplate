@@ -1,0 +1,10 @@
+FROM BASE_IMAGE_TAG AS base_image
+
+ARG CI_JOB_TOKEN
+COPY . /srv/build
+
+RUN \
+    git config --global credential.helper store && \
+    echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@git.cafebazaar.ir" >> ~/.git-credentials && \
+    PROTOC=/srv/protoc3/bin/protoc PROTOC_OPTIONS="-I/srv/protoc3/include -I." make generate && \
+    make postviewd
