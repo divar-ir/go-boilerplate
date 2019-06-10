@@ -1,0 +1,86 @@
+image: registry.cafebazaar.ir:5000/common-images/builder:docker-kube
+
+variables:
+  BUILD_IMAGE_TAG: $CI_REGISTRY_IMAGE:ci_build__${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}
+  BASE_IMAGE_TAG: $CI_REGISTRY_IMAGE:ci_base__${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}
+
+stages:
+  - build
+  - test
+  - push
+  - deploy
+  - cleanup
+
+build:
+  stage: build
+  script:
+    - docker build . -f Dockerfile.base -t $BASE_IMAGE_TAG --build-arg http_proxy=$http_proxy --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg https_proxy=$https_proxy --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg no_proxy=$no_proxy --build-arg NO_PROXY=$NO_PROXY
+    - sed -i "s~BASE_IMAGE_TAG~$BASE_IMAGE_TAG~g" Dockerfile.build
+    - docker build . -f Dockerfile.build -t $BUILD_IMAGE_TAG --build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN --build-arg http_proxy=$http_proxy --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg https_proxy=$https_proxy --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg no_proxy=$no_proxy --build-arg NO_PROXY=$NO_PROXY
+ 
+lint:
+  stage: test
+  except:
+    - master
+    - tags
+  script:
+    - docker run -t --rm $BUILD_IMAGE_TAG make lint
+
+test:
+  stage: test
+  except:
+    - master
+    - tags
+  script:
+    - docker run -t --rm $BUILD_IMAGE_TAG make check
+
+race:
+  stage: test
+  except:
+    - master
+    - tags
+  script:
+    - docker run -t --rm $BUILD_IMAGE_TAG make race
+
+coverage:
+  stage: test
+  script:
+    - docker run -t --rm $BUILD_IMAGE_TAG make coverage
+  except:
+    - tags
+  coverage: '/Total Coverage:\s+(\d+.\d+\%)/'
+
+push:
+  stage: push
+  only:
+    - tags
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - sed -i "s~BUILD_IMAGE_TAG~$BUILD_IMAGE_TAG~g" Dockerfile
+    - make docker
+    - make push
+
+deploy:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: prod
+  allow_failure: false
+  script:
+    - kubectl config set-cluster cafecluster --server=$KUBE_URL --insecure-skip-tls-verify=true
+    - kubectl config set-credentials divar-infra --token=$KUBE_TOKEN
+    - kubectl config set-context default-context --cluster=cafecluster --user=divar-infra
+    - kubectl config use-context default-context
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - make push-production
+    - make deploy
+
+cleanup:
+  stage: cleanup
+  when: always
+  script:
+  - docker rmi $BUILD_IMAGE_TAG
