@@ -29,6 +29,21 @@ clean: ## to remove generated files
 postviewd: $(SRCS) $(PBS) ## Compile postview daemon
 	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/$@
 
+docker: postviewd ## to build docker image
+	$(DOCKER) build -t $(IMAGE_NAME):$(IMAGE_VERSION) .
+
+push: docker ## to push docker image to registry
+	$(DOCKER) push $(IMAGE_NAME):$(VERSION)
+
+push-production: ## to tag and push :production tag on docker image
+	$(DOCKER) pull $(IMAGE_NAME):$(IMAGE_VERSION)
+	$(DOCKER) tag $(IMAGE_NAME):$(IMAGE_VERSION) $(IMAGE_NAME):production
+	$(DOCKER) push $(IMAGE_NAME):production
+
+deploy: ## to deploy it on kubernetes
+	kubectl --namespace divar-review patch deployment/postview -p='{"spec":{"template":{"spec":{"containers":[{"name":"postview","imagePullPolicy":"IfNotPresent"}]}}}}' || echo "No Need To Patch Config"
+	kubectl --namespace divar-review set image deployment/postview postview=$(IMAGE_NAME):$(VERSION)
+
 lint: .bin/golangci-lint ## to lint the files
 	.bin/golangci-lint run --config=.golangci-lint.yml ./...
 
@@ -82,10 +97,13 @@ PROTOC ?= protoc
 PROTOC_OPTIONS ?=
 LINTER_VERSION = v1.12.5
 GIT ?= git
+DOCKER ?= docker
 COMMIT := $(shell $(GIT) rev-parse HEAD)
 VERSION ?= $(strip $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),$(shell $(GIT) describe --tag 2> /dev/null || echo "$(COMMIT)")))
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
 LD_FLAGS := -X $(ROOT)/pkg/postview.Version=$(VERSION) -X $(ROOT)/pkg/postview.Commit=$(COMMIT) -X $(ROOT)/pkg/postview.BuildTime=$(BUILD_TIME)
+IMAGE_NAME ?= registry.cafebazaar.ir:5000/arcana261/golang-boilerplate
+IMAGE_VERSION ?= $(VERSION)
 
 # Helper Variables
 

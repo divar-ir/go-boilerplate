@@ -1,0 +1,98 @@
+variables:
+  CAFEBAZAAR_ROOT: git.cafebazaar.ir
+
+stages:
+  - lint
+  - test
+  - race
+  - coverage
+  - build
+  - deploy
+
+.common_requirements_template: &common_requirements_definition
+  image: registry.cafebazaar.ir:5000/common-images/builder:go1.11
+  cache:
+    paths:
+      - __gopath__/
+    key: "go"
+  before_script:
+    - export GOPATH=$CI_PROJECT_DIR/__gopath__
+    - export PATH=${PATH%:/home/go/bin}
+    - export PATH=$PATH:/$GOPATH/bin
+    - git config --global credential.helper store
+    - echo "$(echo ${CI_REPOSITORY_URL} | cut -d@ -f1)@git.cafebazaar.ir" >> ~/.git-credentials
+    - if [ -d $GOPATH/src/$CAFEBAZAAR_ROOT/$CI_PROJECT_PATH.git ]; then rm -rf $GOPATH/src/$CAFEBAZAAR_ROOT/$CI_PROJECT_PATH.git; fi
+    - mkdir -p $GOPATH/src/$CAFEBAZAAR_ROOT/$CI_PROJECT_PATH.git
+    - for file in $(find . -maxdepth 1 ! -name '__gopath__' ! -name '.'); do cp -rf $file $GOPATH/src/$CAFEBAZAAR_ROOT/$CI_PROJECT_PATH.git; done
+    - cd $GOPATH/src/$CAFEBAZAAR_ROOT/$CI_PROJECT_PATH.git
+    - make dependencies
+ 
+lint:
+  stage: lint
+  except:
+    - master
+    - tags
+  <<: *common_requirements_definition
+  script:
+    - make lint
+
+test:
+  stage: test
+  except:
+    - master
+    - tags
+  <<: *common_requirements_definition
+  script:
+    - make check
+
+race:
+  stage: race
+  except:
+    - master
+    - tags
+  <<: *common_requirements_definition
+  script:
+    - make race
+
+coverage:
+  <<: *common_requirements_definition
+  stage: coverage
+  script:
+    - make coverage
+    - cp coverage.html $CI_PROJECT_DIR/
+  except:
+    - tags
+  artifacts:
+    paths:
+    - coverage.html
+  coverage: '/Total Coverage:\s+(\d+.\d+\%)/'
+
+build:
+  <<: *common_requirements_definition
+  stage: build
+  only:
+    - tags
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - make docker
+    - make push
+
+deploy:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: prod
+  allow_failure: true
+  script:
+    - kubectl config set-cluster cafecluster --server=$KUBE_URL --insecure-skip-tls-verify=true
+    - kubectl config set-credentials divar-infra --token=$KUBE_TOKEN
+    - kubectl config set-context default-context --cluster=cafecluster --user=divar-infra
+    - kubectl config use-context default-context
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - make push-production
+    - make deploy
+
