@@ -72,7 +72,8 @@ $(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(d
 
 .pre-check-go:
 	go get -v github.com/golang/protobuf/protoc-gen-go
-	go get -v github.com/vektra/mockery/.../
+	go install -v github.com/vektra/mockery/cmd/mockery
+
 
 # Variables
 ROOT := git.cafebazaar.ir/arcana261/golang-boilerplate
