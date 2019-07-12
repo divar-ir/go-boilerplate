@@ -5,7 +5,6 @@ PACKAGES := $(shell go list ./... | grep -v /vendor)
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
 PBS = $(patsubst %.proto,%.pb.go,$(patsubst api%,pkg%,$(PROTOS)))
 MOCK_PACKAGES = \
-	internal/pkg/cache \
 	internal/pkg/provider \
 	internal/pkg/metrics
 

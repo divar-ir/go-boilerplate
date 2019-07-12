@@ -2,19 +2,19 @@ package core_test
 
 import (
 	"context"
-	"errors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"testing"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/golang/protobuf/proto"
 
-	cacheMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache/mocks"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	providerMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider/mocks"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -27,8 +27,7 @@ func TestCoreTestSuite(t *testing.T) {
 }
 
 func (s *CoreTestSuite) TestShouldReturnNotFoundIfProviderReturnsNotFound() {
-	cache := &cacheMocks.PostCache{}
-	cache.On("Get", mock.Anything, mock.Anything).Once().Return(nil, false, nil)
+	cache := adaptors.NewSynMapAdaptor(logrus.New())
 
 	mockProvider := &providerMocks.PostProvider{}
 	mockProvider.On("GetPost", mock.Anything, mock.Anything).Once().Return(nil, provider.ErrNotFound)
@@ -46,39 +45,40 @@ func (s *CoreTestSuite) TestShouldReturnNotFoundIfProviderReturnsNotFound() {
 }
 
 func (s *CoreTestSuite) TestShouldReturnFromCacheIfFound() {
-	cache := &cacheMocks.PostCache{}
-	cache.On("Get", mock.Anything, "token").Once().Return(&postview.Post{
-		Token: "token",
-		Title: "title",
-	}, true, nil)
-
+	cache := adaptors.NewSynMapAdaptor(logrus.New())
 	c := core.New(nil, cache)
+	token := "token"
+	title := "title"
+	data, err := proto.Marshal(&postview.Post{
+		Token: token,
+		Title: title,
+	})
+	if !s.NoError(err, "fail to marshalize post") {
+		return
+	}
+	err = cache.Set(context.Background(), token, data)
+	if !s.NoError(err, "fail to marshalize post") {
+		return
+	}
 	response, err := c.GetPost(context.Background(), &postview.GetPostRequest{
-		Token: "token",
+		Token: token,
 	})
 
-	s.Nil(err)
-	s.Equal(response.Post.Token, "token")
-	s.Equal(response.Post.Title, "title")
-	cache.AssertExpectations(s.T())
+	s.NoError(err)
+	s.Equal(response.Post.Token, token)
+	s.Equal(response.Post.Title, title)
 }
 
 func (s *CoreTestSuite) TestShouldReturnFromProviderIfNotCached() {
-	cache := &cacheMocks.PostCache{}
-	cache.On("Get", mock.Anything, "token").Once().Return(nil, false, nil)
-	cache.On("Set", mock.Anything, mock.MatchedBy(func(p *postview.Post) bool {
-		s.Equal("token", p.Token)
-		s.Equal("title", p.Title)
-		return "token" == p.Token && "title" == p.Title
-	}), mock.Anything).Once().Return(nil)
+	cache := adaptors.NewSynMapAdaptor(logrus.New())
 
-	provider := &providerMocks.PostProvider{}
-	provider.On("GetPost", mock.Anything, "token").Once().Return(&postview.Post{
+	mockProvider := &providerMocks.PostProvider{}
+	mockProvider.On("GetPost", mock.Anything, "token").Once().Return(&postview.Post{
 		Token: "token",
 		Title: "title",
 	}, nil)
 
-	c := core.New(provider, cache)
+	c := core.New(mockProvider, cache)
 	response, err := c.GetPost(context.Background(), &postview.GetPostRequest{
 		Token: "token",
 	})
@@ -86,34 +86,4 @@ func (s *CoreTestSuite) TestShouldReturnFromProviderIfNotCached() {
 	s.Nil(err)
 	s.Equal(response.Post.Token, "token")
 	s.Equal(response.Post.Title, "title")
-	cache.AssertExpectations(s.T())
-	provider.AssertExpectations(s.T())
-}
-
-func (s *CoreTestSuite) TestShouldContinueIfCacheFails() {
-	cache := &cacheMocks.PostCache{}
-	cache.On("Get", mock.Anything, "token").Once().Return(nil, false, errors.New("some error"))
-	cache.On("Set", mock.Anything, mock.MatchedBy(func(p *postview.Post) bool {
-		s.Equal("token", p.Token)
-		s.Equal("title", p.Title)
-		return "token" == p.Token && "title" == p.Title
-	}), mock.Anything).Once().Return(errors.New("some error"))
-
-	provider := &providerMocks.PostProvider{}
-	provider.On("GetPost", mock.Anything, "token").Once().Return(&postview.Post{
-		Token: "token",
-		Title: "title",
-	}, nil)
-
-	c := core.New(provider, cache)
-	response, err := c.GetPost(context.Background(), &postview.GetPostRequest{
-		Token: "token",
-	})
-
-	s.Nil(err)
-	s.Equal(response.Post.Token, "token")
-	s.Equal(response.Post.Title, "title")
-	cache.AssertExpectations(s.T())
-	provider.AssertExpectations(s.T())
-
 }

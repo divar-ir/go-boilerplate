@@ -32,7 +32,9 @@ test:
     - master
     - tags
   script:
-    - docker run -t --rm $BUILD_IMAGE_TAG make check
+    - docker run -t -e MULTILAYERCACHE_REDIS_ADDR=redis:6379 --rm $BUILD_IMAGE_TAG make check
+  services:
+    - redis:latest
 
 race:
   stage: test
@@ -40,15 +42,19 @@ race:
     - master
     - tags
   script:
-    - docker run -t --rm $BUILD_IMAGE_TAG make race
+    - docker run -t -e MULTILAYERCACHE_REDIS_ADDR=redis:6379 --rm $BUILD_IMAGE_TAG make race
+  services:
+    - redis:latest
 
 coverage:
   stage: test
   script:
-    - docker run -t --rm $BUILD_IMAGE_TAG make coverage
+    - docker run -t -e MULTILAYERCACHE_REDIS_ADDR=redis:6379 --rm $BUILD_IMAGE_TAG make coverage
   except:
     - tags
   coverage: '/Total Coverage:\s+(\d+.\d+\%)/'
+  services:
+    - redis:latest
 
 push:
   stage: push

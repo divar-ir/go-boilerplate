@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/middlewares"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/multilayercache"
+	"github.com/allegro/bigcache"
 	"log"
 	"net"
 	"net/http"
@@ -18,7 +23,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/cache"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
@@ -103,12 +107,44 @@ func getProvider(config *Config) provider.PostProvider {
 	return providerInstance
 }
 
-func getCache(config *Config) cache.PostCache {
-	redisClient := redis.NewClient(&redis.Options{Addr: config.Cache.Address})
-	cacheInstance := cache.NewRedis(redisClient, config.Cache.Prefix)
-	cacheInstance = cache.NewInstrumentationMiddleware(
+func getCache(config *Config) cache.Layer {
+	var cacheLayers []cache.Layer
+	if config.Cache.Redis.Enabled {
+		redisClient := redis.NewClient(&redis.Options{
+			Addr: fmt.Sprintf("%s:%d", config.Cache.Redis.Host, config.Cache.Redis.Port),
+			DB:   config.Cache.Redis.DB,
+		})
+		// Ping Redis
+		err := redisClient.Ping().Err()
+		if err != nil {
+			panicWithError(err, "fail to connect to redis")
+		}
+		cacheLayers = append(cacheLayers, adaptors.NewRedisAdaptor(config.Cache.Redis.ExpirationTime, redisClient))
+
+	}
+
+	if config.Cache.BigCache.Enabled {
+		bigCacheInstance, err := bigcache.NewBigCache(bigcache.Config{
+			Shards:             config.Cache.BigCache.Shards,
+			LifeWindow:         config.Cache.BigCache.ExpirationTime,
+			MaxEntriesInWindow: config.Cache.BigCache.MaxEntriesInWindow,
+			MaxEntrySize:       config.Cache.BigCache.MaxEntrySize,
+			Verbose:            config.Cache.BigCache.Verbose,
+			HardMaxCacheSize:   config.Cache.BigCache.HardMaxCacheSize,
+		})
+		if err != nil {
+			panicWithError(err, "fail to initialize big cache")
+		}
+
+		cacheLayers = append(cacheLayers, adaptors.NewBigCacheAdaptor(bigCacheInstance))
+
+	}
+
+	cacheInstance := multilayercache.New(cacheLayers...)
+
+	cacheInstance = middlewares.NewInstrumentationMiddleware(
 		cacheInstance, cacheMetrics.With(map[string]string{
-			"cache_type": "redis",
+			"cache_type": "multilayer",
 		}))
 
 	return cacheInstance

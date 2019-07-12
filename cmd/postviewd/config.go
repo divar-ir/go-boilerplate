@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"time"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
 	"github.com/spf13/cobra"
@@ -21,8 +22,29 @@ type Config struct {
 }
 
 type CacheConfig struct {
-	Address string
-	Prefix  string
+	Redis    RedisConfig
+	BigCache BigCacheConfig
+}
+
+type RedisConfig struct {
+	Enabled        bool
+	Host           string
+	Port           int
+	DB             int
+	Prefix         string
+	ExpirationTime time.Duration
+}
+
+type BigCacheConfig struct {
+	Enabled            bool
+	ExpirationTime     time.Duration
+	MaxSpace           int
+	Shards             int
+	LifeWindow         time.Duration
+	MaxEntriesInWindow int
+	MaxEntrySize       int
+	Verbose            bool
+	HardMaxCacheSize   int
 }
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
@@ -40,8 +62,16 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	viper.SetDefault("database.ssl", false)
 	viper.SetDefault("database.maxIdleConnection", 0)
 	viper.SetDefault("database.maxOpenConnection", 0)
-	viper.SetDefault("cache.address", "127.0.0.1:6379")
-	viper.SetDefault("cache.prefix", "DIVAR_POST_VIEW")
+	viper.SetDefault("cache.redis.host", "127.0.0.1")
+	viper.SetDefault("cache.redis.port", 6379)
+	viper.SetDefault("cache.redis.db", 0)
+	viper.SetDefault("cache.redis.expirationTime", 3*time.Hour)
+	viper.SetDefault("cache.redis.prefix", "POST_VIEW")
+	viper.SetDefault("cache.bigCache.shards", 1024)
+	viper.SetDefault("cache.bigCache.maxEntriesInWindow", 1100*10*60)
+	viper.SetDefault("cache.bigCache.maxEntrySize", 500)
+	viper.SetDefault("cache.bigCache.verbose", true)
+	viper.SetDefault("cache.bigCache.hardMaxCacheSize", 125)
 
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
