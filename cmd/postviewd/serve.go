@@ -23,9 +23,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
 	"google.golang.org/grpc"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"

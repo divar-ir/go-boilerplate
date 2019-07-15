@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
 	"github.com/golang/protobuf/proto"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"

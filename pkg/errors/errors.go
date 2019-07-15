@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/xerrors"
 
-	raven "github.com/getsentry/raven-go"
+	"github.com/getsentry/raven-go"
 )
 
 type wrappedError struct {
@@ -65,7 +65,7 @@ func (err *wrappedError) Error() string {
 	return fmt.Sprint(err)
 }
 
-// Getstacktrace implements "github.com/evalphobia/logrus_sentry.Stacktracer"
+// GetStacktrace implements "github.com/evalphobia/logrus_sentry.Stacktracer"
 func (err *wrappedError) GetStacktrace() *raven.Stacktrace {
 	return err.stackTrace
 }

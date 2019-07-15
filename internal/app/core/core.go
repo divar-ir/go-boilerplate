@@ -2,7 +2,8 @@ package core
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
+
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
 	"golang.org/x/xerrors"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"

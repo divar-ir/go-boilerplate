@@ -10,7 +10,7 @@ import (
 
 	"github.com/evalphobia/logrus_sentry"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
 	"github.com/stretchr/testify/suite"
 )
 

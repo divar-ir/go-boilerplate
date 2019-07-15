@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/sql"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

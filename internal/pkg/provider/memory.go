@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/errors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 )
 
