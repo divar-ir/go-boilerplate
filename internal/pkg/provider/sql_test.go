@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/xerrors"
 
