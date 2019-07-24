@@ -6,3 +6,4 @@ mocks
 *.cover
 /coverage.html
 .idea
+**/wire_gen.go
