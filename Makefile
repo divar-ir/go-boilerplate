@@ -14,7 +14,7 @@ MOCKED_FOLDERS = $(patsubst %,%/mocks,$(MOCK_PACKAGES))
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-generate: $(PBS) $(MOCKED_FILES) $(MOCKED_FOLDERS) | .remove_empty_dirs ## Generate all auto-generated files
+generate: $(PBS) $(MOCKED_FILES) $(MOCKED_FOLDERS) cmd/postviewd/wire_gen.go | .remove_empty_dirs ## Generate all auto-generated files
 .remove_empty_dirs:
 	-find . -type d -print | xargs rmdir 2>/dev/null | true
 
@@ -71,6 +71,9 @@ coverage.cover: $(SRCS) $(PBS) Makefile | generate
 	echo "mode: count" > $@
 	grep -h -v "^mode:" .coverage/*.cover >> $@
 
+cmd/postviewd/wire_gen.go: cmd/postviewd/container.go
+	wire ./cmd/postviewd
+
 .SECONDEXPANSION:
 $(PBS): $$(patsubst %.pb.go,%.proto,$$(patsubst pkg%,api%,$$@)) | .pre-check-go
 	$(PROTOC) $(PROTOC_OPTIONS) --go_out=plugins=grpc:$(GOPATH)/src ./$<
@@ -88,6 +91,7 @@ $(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(d
 	if [ -z "$$(which protoc-gen-go)" ]; then go get -v github.com/golang/protobuf/protoc-gen-go; fi
 	if [ -z "$$(which mockery)" ]; then go get -v github.com/vektra/mockery/cmd/mockery; fi
 	if [ -z "$$(which gocov)" ]; then go get -v github.com/axw/gocov/gocov; fi
+	if [ -z "$$(which wire)" ]; then go get -v github.com/google/wire/cmd/wire; fi
 
 # Variables
 ROOT := git.cafebazaar.ir/arcana261/golang-boilerplate

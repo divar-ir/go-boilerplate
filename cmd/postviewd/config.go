@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -101,4 +103,12 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func provideConfig(cmd *cobra.Command) (*Config, error) {
+	config, err := LoadConfig(cmd)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to load configurations.")
+	}
+	return config, nil
 }

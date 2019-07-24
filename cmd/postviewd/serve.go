@@ -3,35 +3,28 @@ package main
 import (
 	"context"
 	"fmt"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/middlewares"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/multilayercache"
-	"github.com/allegro/bigcache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/grpcserver"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics/prometheus"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
 	"log"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/middlewares"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/multilayercache"
+	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/allegro/bigcache"
+
 	"github.com/go-redis/redis"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
 	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
-	"google.golang.org/grpc"
-
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 )
 
 var serveCmd = &cobra.Command{
@@ -47,34 +40,19 @@ func init() {
 func serve(cmd *cobra.Command, args []string) {
 	printVersion()
 
-	config := loadConfigOrPanic(cmd)
-
-	configureLoggerOrPanic(config.Logging)
-
-	prometheusMetricServer := startPrometheusMetricServerOrPanic(config.MetricListenPort)
-	defer shutdownPrometheusMetricServerOrPanic(prometheusMetricServer)
-
-	providerInstance := getProvider(config)
-	cacheInstance := getCache(config)
-	servicer := core.New(providerInstance, cacheInstance)
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", config.ListenPort))
-	if err != nil {
-		panicWithError(err, "failed to listen")
-	}
-
-	grpcServer := configureServer(config)
-	postview.RegisterPostViewServer(grpcServer, servicer)
-
 	serverCtx, serverCancel := makeServerCtx()
 	defer serverCancel()
+
+	server, err := CreateServer(serverCtx, cmd)
+	panicWithError(err, "failed to create server")
+
 	var serverWaitGroup sync.WaitGroup
 
 	serverWaitGroup.Add(1)
 	go func() {
 		defer serverWaitGroup.Done()
 
-		if err := grpcServer.Serve(listener); err != nil {
+		if err := server.Serve(); err != nil {
 			panicWithError(err, "failed to serve")
 		}
 	}()
@@ -85,12 +63,16 @@ func serve(cmd *cobra.Command, args []string) {
 
 	<-serverCtx.Done()
 
-	grpcServer.GracefulStop()
+	server.Stop()
 
 	serverWaitGroup.Wait()
 }
 
-func getProvider(config *Config) provider.PostProvider {
+func provideServer(server postview.PostViewServer, config *Config, logger *logrus.Logger) (*grpcserver.Server, error) {
+	return grpcserver.New(server, logger, config.ListenPort)
+}
+
+func provideProvider(config *Config, logger *logrus.Logger, prometheusMetric *prometheus.Server) provider.PostProvider {
 	db, err := sql.GetDatabase(config.Database)
 	if err != nil {
 		logrus.WithError(err).WithField(
@@ -107,7 +89,7 @@ func getProvider(config *Config) provider.PostProvider {
 	return providerInstance
 }
 
-func getCache(config *Config) cache.Layer {
+func provideCache(config *Config, prometheusMetric *prometheus.Server) (cache.Layer, error) {
 	var cacheLayers []cache.Layer
 	if config.Cache.Redis.Enabled {
 		redisClient := redis.NewClient(&redis.Options{
@@ -117,7 +99,7 @@ func getCache(config *Config) cache.Layer {
 		// Ping Redis
 		err := redisClient.Ping().Err()
 		if err != nil {
-			panicWithError(err, "fail to connect to redis")
+			return nil, errors.Wrap(err, "fail to connect to redis")
 		}
 		cacheLayers = append(cacheLayers, adaptors.NewRedisAdaptor(config.Cache.Redis.ExpirationTime, redisClient))
 
@@ -133,7 +115,7 @@ func getCache(config *Config) cache.Layer {
 			HardMaxCacheSize:   config.Cache.BigCache.HardMaxCacheSize,
 		})
 		if err != nil {
-			panicWithError(err, "fail to initialize big cache")
+			return nil, errors.Wrap(err, "fail to initialize big cache")
 		}
 
 		cacheLayers = append(cacheLayers, adaptors.NewBigCacheAdaptor(bigCacheInstance))
@@ -147,36 +129,7 @@ func getCache(config *Config) cache.Layer {
 			"cache_type": "multilayer",
 		}))
 
-	return cacheInstance
-}
-
-func configureServer(config *Config) *grpc.Server {
-	logEntry := logrus.WithFields(map[string]interface{}{
-		"app": "postviewd",
-	})
-
-	interceptors := []grpc.UnaryServerInterceptor{
-		grpc_logrus.UnaryServerInterceptor(logEntry),
-		errors.UnaryServerInterceptor,
-		grpc_prometheus.UnaryServerInterceptor,
-		grpc_recovery.UnaryServerInterceptor(),
-	}
-
-	return grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptors...)))
-}
-
-func loadConfigOrPanic(cmd *cobra.Command) *Config {
-	config, err := LoadConfig(cmd)
-	if err != nil {
-		panicWithError(err, "Failed to load configurations.")
-	}
-	return config
-}
-
-func configureLoggerOrPanic(loggerConfig LoggingConfig) {
-	if err := configureLogging(&loggerConfig); err != nil {
-		panicWithError(err, "Failed to configure logger.")
-	}
+	return cacheInstance, nil
 }
 
 func makeServerCtx() (context.Context, context.CancelFunc) {
@@ -193,29 +146,6 @@ func makeServerCtx() (context.Context, context.CancelFunc) {
 	}()
 
 	return ctx, cancel
-}
-
-func startPrometheusMetricServerOrPanic(listenPort int) *http.Server {
-	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", listenPort),
-		Handler: promhttp.Handler(),
-	}
-
-	go listenAndServePrometheusMetrics(server)
-
-	return server
-}
-
-func listenAndServePrometheusMetrics(server *http.Server) {
-	if err := server.ListenAndServe(); err != nil {
-		panicWithError(err, "failed to start liveness http probe listener")
-	}
-}
-
-func shutdownPrometheusMetricServerOrPanic(server *http.Server) {
-	if err := server.Shutdown(context.Background()); err != nil {
-		panicWithError(err, "Failed to shutdown prometheus metric server")
-	}
 }
 
 func declareReadiness() error {

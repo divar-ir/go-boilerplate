@@ -2,12 +2,14 @@ module git.cafebazaar.ir/arcana261/golang-boilerplate
 
 require (
 	github.com/allegro/bigcache v1.2.1
+	github.com/axw/gocov v1.0.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20190506164543-d2eda7129713 // indirect
 	github.com/evalphobia/logrus_sentry v0.8.2
 	github.com/getsentry/raven-go v0.2.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/golang/protobuf v1.3.1
+	github.com/google/wire v0.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/jinzhu/gorm v1.9.8

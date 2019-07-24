@@ -17,3 +17,7 @@ func init() {
 	postProviderMetrics = prometheus.NewHistogram("divar_post_view_provider",
 		"view metrics about post provider", "provider_type", "method", "ok", "success")
 }
+
+func providePrometheus(config *Config) *prometheus.Server {
+	return prometheus.NewServer(config.MetricListenPort)
+}

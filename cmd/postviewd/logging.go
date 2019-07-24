@@ -18,20 +18,21 @@ const (
 )
 
 // ConfigureLogging handlerconfig logger based on the given configuration
-func configureLogging(config *LoggingConfig) error {
-	if config.Level != "" {
-		level, err := logrus.ParseLevel(config.Level)
+func provideLogger(config *Config) (*logrus.Logger, error) {
+	logger := logrus.New()
+	if config.Logging.Level != "" {
+		level, err := logrus.ParseLevel(config.Logging.Level)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		logrus.SetLevel(level)
+		logger.SetLevel(level)
 	}
 
-	logrus.SetFormatter(&logrus.JSONFormatter{
+	logger.SetFormatter(&logrus.JSONFormatter{
 		DisableTimestamp: false,
 	})
 
-	if config.SentryEnabled {
+	if config.Logging.SentryEnabled {
 
 		hook, err := logrus_sentry.NewAsyncSentryHook(sentryDSN, []logrus.Level{
 			logrus.PanicLevel,
@@ -46,8 +47,8 @@ func configureLogging(config *LoggingConfig) error {
 
 		hook.StacktraceConfiguration.Enable = true
 
-		logrus.AddHook(hook)
+		logger.AddHook(hook)
 	}
 
-	return nil
+	return logger, nil
 }

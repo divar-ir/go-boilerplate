@@ -19,10 +19,11 @@ func init() {
 
 func migrateDatabase(cmd *cobra.Command, args []string) {
 	printVersion()
-	config := loadConfigOrPanic(cmd)
-	configureLoggerOrPanic(config.Logging)
 
-	providerInstance := getProvider(config)
+	ctx, _ := makeServerCtx()
+
+	providerInstance, err := CreateProvider(ctx, cmd)
+	panicWithError(err, "fail to create provider")
 	migrater, ok := providerInstance.(sql.Migrater)
 	if ok {
 		err := migrater.Migrate()
