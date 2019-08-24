@@ -3,7 +3,7 @@ syntax = "proto3";
 // protoc -I. --go_out=plugins=grpc:$GOPATH/src ./api/postview/postview.proto
 
 package postview;
-option go_package = "git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview";
+option go_package = "github.com/cafebazaar/go-boilerplate/pkg/postview";
 
 import "google/protobuf/timestamp.proto";
 

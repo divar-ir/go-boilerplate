@@ -2,7 +2,7 @@ package adaptors
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/allegro/bigcache"
 	"github.com/pkg/errors"
 )

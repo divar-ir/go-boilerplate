@@ -1,5 +1,5 @@
-[![pipeline status](https://git.cafebazaar.ir/arcana261/golang-boilerplate/badges/master/pipeline.svg)](https://git.cafebazaar.ir/arcana261/golang-boilerplate/commits/master)
-[![coverage report](https://git.cafebazaar.ir/arcana261/golang-boilerplate/badges/master/coverage.svg)](https://git.cafebazaar.ir/arcana261/golang-boilerplate/-/jobs/artifacts/master/raw/coverage.html?job=coverage)
+[![pipeline status](https://github.com/cafebazaar/go-boilerplate/badges/master/pipeline.svg)](https://github.com/cafebazaar/go-boilerplate/commits/master)
+[![coverage report](https://github.com/cafebazaar/go-boilerplate/badges/master/coverage.svg)](https://github.com/cafebazaar/go-boilerplate/-/jobs/artifacts/master/raw/coverage.html?job=coverage)
 
 # Divar Post API
 `Describe your project's mission here.`

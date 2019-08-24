@@ -3,12 +3,12 @@ package core
 import (
 	"context"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 	"golang.org/x/xerrors"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/golang/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"

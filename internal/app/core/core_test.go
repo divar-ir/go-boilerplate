@@ -2,19 +2,19 @@ package core_test
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/internal/app/core"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/golang/protobuf/proto"
 
-	providerMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider/mocks"
+	providerMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/provider/mocks"
 	"github.com/stretchr/testify/suite"
 )
 

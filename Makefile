@@ -94,7 +94,7 @@ $(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(d
 	if [ -z "$$(which wire)" ]; then go get -v github.com/google/wire/cmd/wire; fi
 
 # Variables
-ROOT := git.cafebazaar.ir/arcana261/golang-boilerplate
+ROOT := github.com/cafebazaar/go-boilerplate
 
 PROTOC ?= protoc
 PROTOC_OPTIONS ?= -I.

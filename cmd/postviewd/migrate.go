@@ -1,7 +1,7 @@
 package main
 
 import (
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
+	"github.com/cafebazaar/go-boilerplate/pkg/sql"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

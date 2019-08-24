@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/xerrors"
 )

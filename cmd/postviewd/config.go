@@ -4,9 +4,9 @@ import (
 	"strings"
 	"time"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
+	"github.com/cafebazaar/go-boilerplate/pkg/sql"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

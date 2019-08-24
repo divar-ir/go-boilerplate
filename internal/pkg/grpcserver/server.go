@@ -2,8 +2,8 @@ package grpcserver
 
 import (
 	"fmt"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"

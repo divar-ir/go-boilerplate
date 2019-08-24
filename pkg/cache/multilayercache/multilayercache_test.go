@@ -2,7 +2,7 @@ package multilayercache
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"

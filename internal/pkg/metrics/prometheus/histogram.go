@@ -1,7 +1,7 @@
 package prometheus
 
 import (
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

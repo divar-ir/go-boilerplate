@@ -3,7 +3,7 @@ package provider
 import (
 	context "context"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 )
 
 // PostProvider specifies mechanism of retrieving posts.

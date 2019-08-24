@@ -3,28 +3,28 @@ package main
 import (
 	"context"
 	"fmt"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/grpcserver"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics/prometheus"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/grpcserver"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/prometheus"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/middlewares"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/multilayercache"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/middlewares"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/multilayercache"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 	"github.com/allegro/bigcache"
 
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/sql"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/pkg/sql"
 )
 
 var serveCmd = &cobra.Command{

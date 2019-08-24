@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	metricsMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics/mocks"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
-	providerMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider/mocks"
+	metricsMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/mocks"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	providerMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/provider/mocks"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

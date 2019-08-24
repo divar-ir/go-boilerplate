@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

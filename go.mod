@@ -1,4 +1,4 @@
-module git.cafebazaar.ir/arcana261/golang-boilerplate
+module github.com/cafebazaar/go-boilerplate
 
 require (
 	github.com/allegro/bigcache v1.2.1

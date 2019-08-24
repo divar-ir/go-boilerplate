@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics/prometheus"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/prometheus"
 	"github.com/stretchr/testify/suite"
 )
 

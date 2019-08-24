@@ -4,9 +4,9 @@ package main
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/app/core"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/grpcserver"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/internal/app/core"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/grpcserver"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
 	"github.com/google/wire"
 	"github.com/spf13/cobra"
 )

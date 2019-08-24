@@ -2,11 +2,11 @@ package middlewares
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache/adaptors"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
 	"github.com/sirupsen/logrus"
 	"testing"
 
-	metricsMocks "git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics/mocks"
+	metricsMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/mocks"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

@@ -2,7 +2,7 @@ package adaptors
 
 import (
 	"context"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/go-redis/redis"
 	"github.com/pkg/errors"
 	"time"

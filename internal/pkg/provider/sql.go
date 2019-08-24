@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/errors"
+	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 	"github.com/golang/protobuf/proto"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/postview"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	gormigrate "gopkg.in/gormigrate.v1"
 
 	"github.com/jinzhu/gorm"

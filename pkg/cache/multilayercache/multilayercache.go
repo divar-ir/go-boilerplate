@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

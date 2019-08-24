@@ -3,10 +3,10 @@ package middlewares
 import (
 	"context"
 	"fmt"
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/pkg/cache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"time"
 
-	"git.cafebazaar.ir/arcana261/golang-boilerplate/internal/pkg/metrics"
+	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics"
 )
 
 type instrumentationMiddleware struct {
