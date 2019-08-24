@@ -20,10 +20,10 @@ func init() {
 func migrateDatabase(cmd *cobra.Command, args []string) {
 	printVersion()
 
-	ctx, _ := makeServerCtx()
-
-	providerInstance, err := CreateProvider(ctx, cmd)
+	config, err := provideConfig(cmd)
 	panicWithError(err, "fail to create provider")
+	prometheus := providePrometheus(config)
+	providerInstance := provideProvider(config, logrus.New(), prometheus)
 	migrater, ok := providerInstance.(sql.Migrater)
 	if ok {
 		err := migrater.Migrate()
