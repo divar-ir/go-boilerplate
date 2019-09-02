@@ -1,11 +1,18 @@
-[![pipeline status](https://github.com/cafebazaar/go-boilerplate/badges/master/pipeline.svg)](https://github.com/cafebazaar/go-boilerplate/commits/master)
-[![coverage report](https://github.com/cafebazaar/go-boilerplate/badges/master/coverage.svg)](https://github.com/cafebazaar/go-boilerplate/-/jobs/artifacts/master/raw/coverage.html?job=coverage)
-
 # Divar Post API
-`Describe your project's mission here.`
+A sample gRPC server with Go inspired by Divar's postview microservice.
+This project aims to share best practices and design patterns for writing a new go microservice with a good quality that meets our requirements inside CafeBazaar.  
+
+You have find a better pattern or library? Let us know by creating a new issue.
 
 ## How to run:
-`Describe how to build and run`
+Compile the code
+```
+make postviewd
+```
+Then Run the binary
+```
+./postviewd serve
+```
 
 # Emergency
 In case of emergencies checkout our [Emergency ABC](EMERGENCY.md).
