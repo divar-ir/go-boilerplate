@@ -5,7 +5,7 @@ PACKAGES := $(shell go list ./... | grep -v /vendor)
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
 PBS = $(patsubst %.proto,%.pb.go,$(patsubst api%,pkg%,$(PROTOS)))
 MOCK_PACKAGES = \
-	internal/pkg/provider \
+	internal/app/provider \
 	internal/pkg/metrics
 
 MOCKED_FILES = $(shell find . -name DOES_NOT_EXIST_FILE $(patsubst %,-or -path "./%/mocks/*.go",$(MOCK_PACKAGES)))
@@ -25,7 +25,7 @@ clean: ## to remove generated files
 	-rm -rf postviewd
 	-find . -type d -name mocks -exec rm -rf \{} +
 
-postviewd: $(SRCS) $(PBS) ## Compile postview daemon
+postviewd: $(SRCS) $(PBS) | generate ## Compile postview daemon
 	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/$@
 
 docker: ## to build docker image

@@ -8,7 +8,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	"github.com/cafebazaar/go-boilerplate/pkg/postview"
-	gormigrate "gopkg.in/gormigrate.v1"
+	"gopkg.in/gormigrate.v1"
 
 	"github.com/jinzhu/gorm"
 )

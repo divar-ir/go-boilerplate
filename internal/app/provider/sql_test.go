@@ -2,10 +2,10 @@ package provider_test
 
 import (
 	"context"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"io"
 	"testing"
 
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
 	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/cafebazaar/go-boilerplate/pkg/sql"
 	"github.com/stretchr/testify/suite"

@@ -6,7 +6,7 @@ import (
 	"context"
 	"github.com/cafebazaar/go-boilerplate/internal/app/core"
 	"github.com/cafebazaar/go-boilerplate/internal/pkg/grpcserver"
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"github.com/google/wire"
 	"github.com/spf13/cobra"
 )

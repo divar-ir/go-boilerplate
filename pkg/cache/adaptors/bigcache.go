@@ -2,8 +2,8 @@ package adaptors
 
 import (
 	"context"
-	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/allegro/bigcache"
+	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/pkg/errors"
 )
 

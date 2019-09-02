@@ -6,7 +6,7 @@ import (
 	"github.com/cafebazaar/go-boilerplate/pkg/errors"
 	"golang.org/x/xerrors"
 
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/golang/protobuf/proto"

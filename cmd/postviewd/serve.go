@@ -3,27 +3,27 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"github.com/cafebazaar/go-boilerplate/internal/pkg/grpcserver"
 	"github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/prometheus"
-	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
+	"github.com/allegro/bigcache"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache/middlewares"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache/multilayercache"
 	"github.com/cafebazaar/go-boilerplate/pkg/errors"
-	"github.com/allegro/bigcache"
+	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
 	"github.com/cafebazaar/go-boilerplate/pkg/sql"
 )
 

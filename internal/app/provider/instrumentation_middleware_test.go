@@ -1,13 +1,13 @@
 package provider_test
 
 import (
-	context "context"
+	"context"
 	"errors"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"testing"
 
+	providerMocks "github.com/cafebazaar/go-boilerplate/internal/app/provider/mocks"
 	metricsMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/metrics/mocks"
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
-	providerMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/provider/mocks"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

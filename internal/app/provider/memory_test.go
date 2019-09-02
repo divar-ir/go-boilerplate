@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
 	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/xerrors"
@@ -13,7 +12,7 @@ import (
 type MemoryProviderTestSuite struct {
 	suite.Suite
 
-	provider provider.PostProvider
+	provider PostProvider
 }
 
 func TestMemoryProviderTestSuite(t *testing.T) {
@@ -22,7 +21,7 @@ func TestMemoryProviderTestSuite(t *testing.T) {
 
 func (s *MemoryProviderTestSuite) TestShouldReturnNotFoundInitially() {
 	_, err := s.provider.GetPost(context.Background(), "token")
-	s.True(xerrors.Is(err, provider.ErrNotFound))
+	s.True(xerrors.Is(err, ErrNotFound))
 }
 
 func (s *MemoryProviderTestSuite) TestShouldReturnPostAfterAdd() {
@@ -46,5 +45,5 @@ func (s *MemoryProviderTestSuite) TestShouldReturnPostAfterAdd() {
 }
 
 func (s *MemoryProviderTestSuite) SetupTest() {
-	s.provider = provider.NewMemory()
+	s.provider = NewMemory()
 }

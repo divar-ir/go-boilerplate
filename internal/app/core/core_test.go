@@ -2,7 +2,7 @@ package core_test
 
 import (
 	"context"
-	"github.com/cafebazaar/go-boilerplate/internal/pkg/provider"
+	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
 	"github.com/cafebazaar/go-boilerplate/pkg/cache/adaptors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
@@ -14,7 +14,7 @@ import (
 	"github.com/cafebazaar/go-boilerplate/pkg/postview"
 	"github.com/golang/protobuf/proto"
 
-	providerMocks "github.com/cafebazaar/go-boilerplate/internal/pkg/provider/mocks"
+	providerMocks "github.com/cafebazaar/go-boilerplate/internal/app/provider/mocks"
 	"github.com/stretchr/testify/suite"
 )
 
