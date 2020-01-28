@@ -1,4 +1,4 @@
-FROM BUILD_IMAGE_TAG as build_image
+FROM build_image_tag as build_image
 
 FROM ubuntu:18.04
 
@@ -10,6 +10,6 @@ RUN apt update --fix-missing && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get clean
 
-COPY --from=build_image /srv/build/postviewd /bin/
+COPY --from=build_image /srv/build/appdetaild /bin/
 
-ENTRYPOINT ["/bin/postviewd", "serve"]
+ENTRYPOINT ["/bin/appdetaild", "serve"]

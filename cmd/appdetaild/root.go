@@ -5,7 +5,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "postviewd serve",
+	Use:   "appdetaild serve",
 	Short: "serves posts to be viewed by users",
 	Long:  "Serves posts from a local database which is accompanied by a cache",
 	Run:   nil,

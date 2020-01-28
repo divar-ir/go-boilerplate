@@ -1,4 +1,4 @@
-package postview
+package appdetail
 
 import (
 	"os"
@@ -28,7 +28,7 @@ func init() {
 		BuildTime = "unknown"
 	}
 	if Title == "" {
-		Title = "postview"
+		Title = "appdetail"
 	}
 
 	StartTime = time.Now()

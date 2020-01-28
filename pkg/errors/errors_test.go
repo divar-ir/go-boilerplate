@@ -10,7 +10,7 @@ import (
 
 	"github.com/evalphobia/logrus_sentry"
 
-	"github.com/cafebazaar/go-boilerplate/pkg/errors"
+	"git.cafebazaar.ir/bardia/lazyapi/pkg/errors"
 	"github.com/stretchr/testify/suite"
 )
 

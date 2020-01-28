@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+// protoc -I. --go_out=plugins=grpc:. /appdetail.proto
+
+package appdetail;
+option go_package = "./pkg/appdetail";
+
+message GetAppDetailRequest {
+    string package_name = 1;
+
+}
+
+message GetAppDetailReply {
+    App detail = 1;
+    int32 statusCode = 2;
+}
+
+message App {
+    string name = 1;
+    string description = 2;
+    string homepage = 3;
+    string email = 4;
+    string authorName = 5;
+    string categoryName = 6;
+    Package package = 7;
+}
+
+message Package {
+    uint32 packageId = 1;
+    string packageHash = 2;
+    uint32 versionCode = 3;
+    string versionName = 4;
+    string minimumSDKVersion = 5;
+    repeated string permissions = 6;
+}
+
+service AppDetail {
+    rpc GetAppDetail(GetAppDetailRequest) returns (GetAppDetailReply);
+}
