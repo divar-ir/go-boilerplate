@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazyapi
+  namespace: bazaar-infra
+  labels:
+    app: lazyapi
+spec:
+  selector:
+    matchLabels:
+      app: lazyapi
+  template:
+    metadata:
+      labels:
+        app: lazyapi
+    spec:
+      imagePullSecrets:
+        - name: regsecret
+      serviceAccount: dilmaj
+      serviceAccountName: dilmaj
+      containers:
+        - name: nazer
+          image: registry.cafebazaar.ir:5000/bardia/lazyapi:12f9f74acede0f88c6683ca287399fc16cc30f8e
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi

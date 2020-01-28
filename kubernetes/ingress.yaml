@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: lazyapi
+  namespace: bazaar-infra
+spec:
+  rules:
+    - host: appdetail.test.roo.cloud
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: lazyapi
+              servicePort: 8080
+
