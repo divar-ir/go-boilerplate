@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: laziapi
+  namespace: bazaar-infra
+spec:
+  ports:
+    - name: grpc
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: lazyapi
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

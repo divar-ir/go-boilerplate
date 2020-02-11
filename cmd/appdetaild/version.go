@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/cafebazaar/go-boilerplate/pkg/postview"
+	"git.cafebazaar.ir/bardia/lazyapi/pkg/appdetail"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +21,6 @@ func init() {
 }
 
 func printVersion() {
-	fmt.Printf("%-18s %-18s Commit:%s                  (%s)\n", postview.Title, postview.Version,
-		postview.Commit, postview.BuildTime)
+	fmt.Printf("%-18s %-18s Commit:%s                  (%s)\n", appdetail.Title, appdetail.Version,
+		appdetail.Commit, appdetail.BuildTime)
 }

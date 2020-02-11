@@ -1,92 +1,81 @@
 package core
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"git.cafebazaar.ir/bardia/lazyapi/pkg/errors"
+	"io/ioutil"
+	"net/http"
+	"sync"
+	"time"
 
-	"github.com/cafebazaar/go-boilerplate/pkg/errors"
-	"golang.org/x/xerrors"
-
-	"github.com/cafebazaar/go-boilerplate/internal/app/provider"
-	"github.com/cafebazaar/go-boilerplate/pkg/cache"
-	"github.com/cafebazaar/go-boilerplate/pkg/postview"
-	"github.com/golang/protobuf/proto"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"git.cafebazaar.ir/bardia/lazyapi/pkg/appdetail"
 )
 
 type core struct {
-	provider provider.PostProvider
-	cache    cache.Layer
+	globalLock sync.Mutex
 }
 
-func New(provider provider.PostProvider, cache cache.Layer) postview.PostViewServer {
+func New() appdetail.AppDetailServer {
 	return &core{
-		provider: provider,
-		cache:    cache,
+		globalLock: sync.Mutex{},
 	}
 }
 
-func (c *core) GetPost(ctx context.Context, request *postview.GetPostRequest) (*postview.GetPostResponse, error) {
-	post, err := c.getPostFromCache(ctx, request.Token)
+func (c *core) GetAppDetail(ctx context.Context, request *appdetail.GetAppDetailRequest) (*appdetail.GetAppDetailReply, error) {
+	c.globalLock.Lock()
+	defer c.globalLock.Unlock()
+	time.Sleep(1 * time.Second)
+
+	resp, err := http.Post("https://api.cafebazaar.ir/rest-v1/process",
+		"application/json",
+		bytes.NewBufferString(fmt.Sprintf("{\"singleRequest\":{\"appDetailsRequest\":{\"packageName\":\"%s\"}}}", request.PackageName)))
 	if err != nil {
-		logrus.WithError(err).WithFields(map[string]interface{}{
-			"token": request.Token,
-		}).Error("failed to load data from cache")
-	} else {
-		return &postview.GetPostResponse{
-			Post: post,
+		return nil, errors.Wrap(err, "fail to send request to cafebazaar")
+	}
+
+	if resp.StatusCode != 200 {
+		return &appdetail.GetAppDetailReply{
+			StatusCode: int32(resp.StatusCode),
 		}, nil
 	}
 
-	post, err = c.provider.GetPost(ctx, request.Token)
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		if xerrors.Is(err, provider.ErrNotFound) {
-			return nil, status.Error(codes.NotFound, "post not found")
-		}
+		return nil, errors.Wrap(err, "fail to send request to cafebazaar")
+	}
+	var objmap = make(map[string]interface{})
 
-		return nil, errors.WrapWithExtra(err, "failed to acquire post", map[string]interface{}{
-			"request": request,
-		})
+	err = json.Unmarshal(b, &objmap)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to send request to cafebazaar")
 	}
 
-	err = c.setPostFromCache(ctx, request.Token, post)
-	if err != nil {
-		logrus.WithError(err).WithFields(map[string]interface{}{
-			"token": request.Token,
-		}).Error("failed to set data in cache")
+	respMap := objmap["singleReply"].(map[string]interface{})["appDetailsReply"].(map[string]interface{})
+	packageMap:= respMap["package"].(map[string]interface{})
+	var permissions []string
+	for _,a := range packageMap["permissions"].([]interface{}){
+		permissions = append(permissions, a.(string))
 	}
-	return &postview.GetPostResponse{
-		Post: post,
+	return &appdetail.GetAppDetailReply{
+		Detail: &appdetail.App{
+			Name:         respMap["name"].(string),
+			Description:  respMap["description"].(string),
+			Homepage:     respMap["homepage"].(string),
+			Email:        respMap["appEmail"].(string),
+			AuthorName:   respMap["authorName"].(string),
+			CategoryName: respMap["categoryName"].(string),
+			Package: &appdetail.Package{
+				PackageId: uint32(packageMap["packageID"].(float64)),
+				PackageHash: packageMap["packageHash"].(string),
+				VersionCode: uint32(packageMap["versionCode"].(float64)),
+				VersionName: packageMap["versionName"].(string),
+				MinimumSDKVersion: packageMap["minimumSDKVersion"].(string),
+				Permissions: permissions,
+			},
+		},
 	}, nil
-}
-
-func (c *core) getPostFromCache(ctx context.Context, token string) (*postview.Post, error) {
-	data, err := c.cache.Get(ctx, token)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to get post from cache")
-	}
-	var result = &postview.Post{}
-	err = proto.Unmarshal(data, result)
-	if err != nil {
-		return nil, errors.WrapWithExtra(err, "failed to unmarshal proto", map[string]interface{}{
-			"token": token,
-		})
-	}
-
-	logrus.Info("load post from cache")
-	return result, nil
-
-}
-
-func (c *core) setPostFromCache(ctx context.Context, token string, post *postview.Post) (err error) {
-	data, err := proto.Marshal(post)
-	if err != nil {
-		return errors.Wrap(err, "fail to marshal post")
-	}
-	err = c.cache.Set(ctx, token, data)
-	if err != nil {
-		return errors.Wrap(err, "fail to set post in cache")
-	}
-	return nil
 }

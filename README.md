@@ -1,5 +1,5 @@
 # Divar Post API
-A sample gRPC server with Go inspired by Divar's postview microservice.
+A sample gRPC server with Go inspired by Divar's appdetail microservice.
 This project aims to share best practices and design patterns for writing a new go microservice with a good quality that meets our requirements inside CafeBazaar.  
 
 You have find a better pattern or library? Let us know by creating a new issue.
@@ -7,11 +7,11 @@ You have find a better pattern or library? Let us know by creating a new issue.
 ## How to run:
 Compile the code
 ```
-make postviewd
+make appdetaild
 ```
 Then Run the binary
 ```
-./postviewd serve
+./appdetaild serve
 ```
 
 # Emergency

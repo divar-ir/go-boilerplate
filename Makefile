@@ -4,17 +4,11 @@ SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -
 PACKAGES := $(shell go list ./... | grep -v /vendor)
 PROTOS = $(patsubst ./%,%,$(shell find . -name "*.proto"))
 PBS = $(patsubst %.proto,%.pb.go,$(patsubst api%,pkg%,$(PROTOS)))
-MOCK_PACKAGES = \
-	internal/app/provider \
-	internal/pkg/metrics
-
-MOCKED_FILES = $(shell find . -name DOES_NOT_EXIST_FILE $(patsubst %,-or -path "./%/mocks/*.go",$(MOCK_PACKAGES)))
-MOCKED_FOLDERS = $(patsubst %,%/mocks,$(MOCK_PACKAGES))
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-generate: $(PBS) $(MOCKED_FILES) $(MOCKED_FOLDERS) cmd/postviewd/wire_gen.go | .remove_empty_dirs ## Generate all auto-generated files
+generate: $(PBS) cmd/appdetaild/wire_gen.go | .remove_empty_dirs ## Generate all auto-generated files
 .remove_empty_dirs:
 	-find . -type d -print | xargs rmdir 2>/dev/null | true
 
@@ -22,14 +16,19 @@ dependencies: | .pre-check-go .bin/golangci-lint ## to install the dependencies
 	go mod download
 
 clean: ## to remove generated files
-	-rm -rf postviewd
-	-find . -type d -name mocks -exec rm -rf \{} +
+	-rm -rf appdetaild
 
-postviewd: $(SRCS) $(PBS) | generate ## Compile postview daemon
+appdetaild: $(SRCS) $(PBS) | generate ## Compile appdetail daemon
 	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/$@
 
 docker: ## to build docker image
 	$(DOCKER) build -t $(IMAGE_NAME):$(IMAGE_VERSION) .
+
+docker-local:
+	$(DOCKER) build . -f Dockerfile.base -t base_image_tag --build-arg http_proxy=$(http_proxy) --build-arg HTTP_PROXY=$(HTTP_PROXY) --build-arg https_proxy=$(https_proxy) --build-arg HTTPS_PROXY=$(HTTPS_PROXY) --build-arg no_proxy=$(no_proxy) --build-arg NO_PROXY=$(NO_PROXY)
+	$(DOCKER) build . -f Dockerfile.build -t build_image_tag --build-arg CI_JOB_TOKEN=$(CI_JOB_TOKEN) --build-arg http_proxy=$(http_proxy) --build-arg HTTP_PROXY=$(HTTP_PROXY) --build-arg https_proxy=$(https_proxy) --build-arg HTTPS_PROXY=$(HTTPS_PROXY) --build-arg no_proxy=$(no_proxy) --build-arg NO_PROXY=$(NO_PROXY)
+	$(DOCKER) build -t $(IMAGE_NAME):$(IMAGE_VERSION) .
+
 
 push: docker ## to push docker image to registry
 	$(DOCKER) push $(IMAGE_NAME):$(VERSION)
@@ -40,8 +39,8 @@ push-production: ## to tag and push :production tag on docker image
 	$(DOCKER) push $(IMAGE_NAME):production
 
 deploy: ## to deploy it on kubernetes
-	kubectl --namespace divar-review patch deployment/postview -p='{"spec":{"template":{"spec":{"containers":[{"name":"postview","imagePullPolicy":"IfNotPresent"}]}}}}' || echo "No Need To Patch Config"
-	kubectl --namespace divar-review set image deployment/postview postview=$(IMAGE_NAME):$(VERSION)
+	kubectl --namespace divar-review patch deployment/appdetail -p='{"spec":{"template":{"spec":{"containers":[{"name":"appdetail","imagePullPolicy":"IfNotPresent"}]}}}}' || echo "No Need To Patch Config"
+	kubectl --namespace divar-review set image deployment/appdetail appdetail=$(IMAGE_NAME):$(VERSION)
 
 lint: .bin/golangci-lint ## to lint the files
 	.bin/golangci-lint run --config=.golangci-lint.yml ./...
@@ -71,30 +70,21 @@ coverage.cover: $(SRCS) $(PBS) Makefile | generate
 	echo "mode: count" > $@
 	grep -h -v "^mode:" .coverage/*.cover >> $@
 
-cmd/postviewd/wire_gen.go: cmd/postviewd/container.go
-	wire ./cmd/postviewd
+cmd/appdetaild/wire_gen.go: cmd/appdetaild/container.go
+	wire ./cmd/appdetaild
 
 .SECONDEXPANSION:
 $(PBS): $$(patsubst %.pb.go,%.proto,$$(patsubst pkg%,api%,$$@)) | .pre-check-go
-	$(PROTOC) $(PROTOC_OPTIONS) --go_out=plugins=grpc:$(GOPATH)/src ./$<
+	$(PROTOC) $(PROTOC_OPTIONS) --go_out=plugins=grpc:. ./$<
 
-.SECONDEXPANSION:
-$(MOCKED_FOLDERS): | .pre-check-go
-	cd $(patsubst %/mocks,%,$@) && mockery -all -outpkg mocks -output mocks
-
-.SECONDEXPANSION:
-$(MOCKED_FILES): $$(shell find $$(patsubst %/mocks,%,$$(patsubst %/mocks/,%,$$(dir $$@))) -maxdepth 1 -name "*.go") | $(MOCKED_FOLDERS)
-	rm -rf $(dir $@)
-	cd $(patsubst %/mocks,%,$(patsubst %/mocks/,%,$(dir $@))) && mockery -all -outpkg mocks -output mocks
 
 .pre-check-go: 
 	if [ -z "$$(which protoc-gen-go)" ]; then go get -v github.com/golang/protobuf/protoc-gen-go; fi
-	if [ -z "$$(which mockery)" ]; then go get -v github.com/vektra/mockery/cmd/mockery; fi
 	if [ -z "$$(which gocov)" ]; then go get -v github.com/axw/gocov/gocov; fi
 	if [ -z "$$(which wire)" ]; then go get -v github.com/google/wire/cmd/wire; fi
 
 # Variables
-ROOT := github.com/cafebazaar/go-boilerplate
+ROOT := git.cafebazaar.ir/bardia/lazyapi
 
 PROTOC ?= protoc
 PROTOC_OPTIONS ?= -I.
@@ -105,8 +95,8 @@ COMMIT := $(shell $(GIT) rev-parse HEAD)
 CI_COMMIT_TAG ?=
 VERSION ?= $(strip $(if $(CI_COMMIT_TAG),$(CI_COMMIT_TAG),$(shell $(GIT) describe --tag 2> /dev/null || echo "$(COMMIT)")))
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
-LD_FLAGS := -X $(ROOT)/pkg/postview.Version=$(VERSION) -X $(ROOT)/pkg/postview.Commit=$(COMMIT) -X $(ROOT)/pkg/postview.BuildTime=$(BUILD_TIME)
-IMAGE_NAME ?= registry.cafebazaar.ir:5000/arcana261/golang-boilerplate
+LD_FLAGS := -X $(ROOT)/pkg/appdetail.Version=$(VERSION) -X $(ROOT)/pkg/appdetail.Commit=$(COMMIT) -X $(ROOT)/pkg/appdetail.BuildTime=$(BUILD_TIME)
+IMAGE_NAME ?= registry.cafebazaar.ir:5000/bardia/lazyapi
 IMAGE_VERSION ?= $(VERSION)
 
 # Helper Variables
